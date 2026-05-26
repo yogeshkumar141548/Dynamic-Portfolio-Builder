@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Portfolio Builder</title>
+    <link rel="stylesheet" href="style-login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card" id="signInCard">
+            <h2>Dynamic Portfolio Builder</h2>
+            <p class="subtitle">Log in to update your professional timeline</p>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="e.g., mail@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-block">Secure Sign In</button>
+            </form>
+            <div id="errorMessage" class="error-msg"></div>
+            
+            <p class="toggle-text" style="margin-top: 10px;"><a id="toResetPassword">Forgot Password?</a></p>
+            <p class="toggle-text">Need a new account? <a id="toSignUp">Sign Up here</a></p>
+        </div>
+
+        <div class="login-card hidden" id="signUpCard">
+            <h2>Create Account</h2>
+            <p class="subtitle">Join the platform and build your dynamic portfolio</p>
+            <form id="signUpForm">
+                <div class="input-group">
+                    <label for="regEmail">Email Address</label>
+                    <input type="email" id="regEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label for="regPassword">Password (Min 6 characters)</label>
+                    <input type="password" id="regPassword" placeholder="Create a password" required>
+                </div>
+                <div class="input-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Retype password" required>
+                </div>
+                <button type="submit" class="btn-block register-btn">Register & Create Portfolio</button>
+            </form>
+            <div id="signUpError" class="error-msg"></div>
+            <div id="signUpSuccess" class="success-msg"></div>
+            <p class="toggle-text">Already have an account? <a id="toSignIn">Sign In here</a></p>
+        </div>
+
+        <div class="login-card hidden" id="resetCard">
+            <h2>Reset Password</h2>
+            <p class="subtitle">Enter your email to receive a password reset link</p>
+            <form id="resetForm">
+                <div class="input-group">
+                    <label for="resetEmail">Registered Email Address</label>
+                    <input type="email" id="resetEmail" placeholder="Enter your email" required>
+                </div>
+                <button type="submit" class="btn-block reset-btn">Send Reset Link</button>
+            </form>
+            <div id="resetMessage" style="margin-top: 15px; font-size: 13px; text-align: center; font-weight: 500;"></div>
+            <p class="toggle-text"><a id="backToSignIn">← Back to Sign In</a></p>
+        </div>
+
+    </div>
+    <script type="module" src="login.js"></script>
+</body>
+</html>

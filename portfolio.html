@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Identity Matrix</title>
+    <link rel="stylesheet" href="style-portfolio.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body class="theme-light">
+    
+    <div class="action-bar" id="actionBar">
+        <button id="downloadPdfBtn" class="btn-pdf">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 5px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Download CV as PDF
+        </button>
+    </div>
+
+    <div class="portfolio-container" id="portfolioContent">
+        
+        <header class="hero-section">
+            <div class="hero-content">
+                <div class="hero-avatar-wrapper">
+                    <img id="viewAvatar" src="https://via.placeholder.com/150" class="portfolio-avatar-frame" alt="Profile Image">
+                </div>
+                <div class="hero-text-wrapper">
+                    <h1 id="viewName"></h1>
+                    <h2 id="viewTitle"></h2>
+                    <p id="viewBio"></p>
+                    <div id="viewSocialDeck" class="social-link-wrapper"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="portfolio-grid">
+            <aside class="sidebar-info">
+                <div class="card" id="contactInfoCard" style="display: none;">
+                    <h3>Contact Details</h3>
+                    <div id="contactDetailsBlock" class="contact-block"></div>
+                </div>
+
+                <div class="card" id="eduCardView" style="display: none;">
+                    <h3>Education</h3>
+                    <div id="educationViewBlock"></div>
+                </div>
+
+                <div class="card" id="certCardView" style="display: none;">
+                    <h3>Certifications</h3>
+                    <div id="certificationsViewBlock"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Core Competencies</h3>
+                    <div id="coreCompetenciesContainer" class="badge-group"></div>
+                </div>
+                
+                <div class="card">
+                    <h3>Technical Skills</h3>
+                    <div id="techSkillsContainer" class="badge-group"></div>
+                </div>
+
+                <div class="card contact-form-card">
+                    <h3>Send a Message</h3>
+                    <form id="contactForm">
+                        <input type="text" id="senderName" class="input-form" placeholder="Full Name" required>
+                        <input type="email" id="senderEmail" class="input-form" placeholder="Email Address" required>
+                        <textarea id="senderMsg" class="input-form msg-area" placeholder="How can I help you?" required></textarea>
+                        <button type="submit" class="submit-msg-btn">Send Message</button>
+                    </form>
+                    <div id="contactAck" class="contact-acknowledgement"></div>
+                </div>
+            </aside>
+
+            <main class="main-timeline">
+                <div class="card experience-card">
+                    <h3>Professional Experience</h3>
+                    <div id="experienceTimeline" class="timeline"></div>
+                </div>
+
+                <div class="card projects-card">
+                    <h3>Project Portfolio</h3>
+                    <div id="dynamicFilters" class="filter-container"></div>
+                    <div id="projectsGrid" class="projects-grid-layout"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <script type="module" src="view.js"></script>
+</body>
+</html>

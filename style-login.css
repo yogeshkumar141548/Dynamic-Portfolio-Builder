@@ -1,0 +1,43 @@
+body {
+    margin: 0; padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ffffff; /* Piche ka dark gradient hata kar pure white kar diya gaya hai */
+    display: flex; justify-content: center; align-items: center; height: 100vh;
+}
+
+.login-container { width: 100%; max-width: 420px; padding: 20px; box-sizing: border-box; }
+
+.login-card { 
+    background: #ffffff; 
+    padding: 40px; 
+    border-radius: 12px; 
+    /* White background par card ko alag dikhane ke liye soft shadow aur border */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+    border: 1px solid #e2e8f0; 
+}
+
+h2 { margin: 0 0 8px 0; color: #1e293b; font-size: 24px; text-align: center; }
+.subtitle { margin: 0 0 24px 0; color: #64748b; font-size: 14px; text-align: center; }
+
+.input-group { margin-bottom: 18px; }
+.input-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: #475569; }
+.input-group input { width: 100%; padding: 11px 14px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; transition: border-color 0.2s; }
+.input-group input:focus { outline: none; border-color: #2563eb; }
+
+/* BUTTONS */
+.btn-block { width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 15px; cursor: pointer; transition: background-color 0.2s; }
+.btn-block:hover { background: #1d4ed8; }
+
+.register-btn { background: #10b981; }
+.register-btn:hover { background: #059669; }
+
+.reset-btn { background: #eab308; color: #1f2937; }
+.reset-btn:hover { background: #ca8a04; }
+
+/* MESSAGES & UTILS */
+.error-msg { margin-top: 15px; color: #dc2626; font-size: 13px; text-align: center; font-weight: 500; }
+.success-msg { margin-top: 15px; color: #10b981; font-size: 13px; text-align: center; font-weight: 500; }
+.toggle-text { margin-top: 20px; font-size: 13px; text-align: center; color: #64748b; }
+.toggle-text a { color: #2563eb; text-decoration: none; font-weight: 600; cursor: pointer; }
+.toggle-text a:hover { text-decoration: underline; }
+.hidden { display: none; }
