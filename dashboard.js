@@ -44,7 +44,15 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     signOut(auth).then(() => { window.location.href = "index.html"; });
 });
 
-// --- CROPPER MECHANISM CORE PROCESSING HUB ---
+const form = document.getElementById('portfolioForm');
+if (form) {
+    form.addEventListener('input', () => {
+        if(document.getElementById('prevName')) document.getElementById('prevName').innerText = document.getElementById('fullName').value || "Professional Name";
+        if(document.getElementById('prevTitle')) document.getElementById('prevTitle').innerText = document.getElementById('jobTitle').value || "Headline Structure";
+        if(document.getElementById('prevBio')) document.getElementById('prevBio').innerText = document.getElementById('bio').value || "Summary framework context output canvas.";
+    });
+}
+
 const avatarUploadInput = document.getElementById('avatarUpload');
 const cropperModalOverlay = document.getElementById('cropperModalOverlay');
 const cropperRawImageFrame = document.getElementById('cropperRawImageFrame');
@@ -73,7 +81,6 @@ if (avatarUploadInput) {
     });
 }
 
-// APPLY CROP OPERATION BUTTON (LOCK & UPDATE CONFIGURATION VALUE)
 const cropBtn = document.getElementById('btnExecuteCropOperation');
 if (cropBtn) {
     cropBtn.addEventListener('click', () => {
@@ -105,7 +112,6 @@ if (cancelCropBtn) {
     });
 }
 
-// --- DYNAMIC HTML NODES FOR GRIDS GENERATION ---
 function appendEducationNode(data = {}) {
     const parent = document.getElementById('educationContainer');
     if (!parent) return;
@@ -151,9 +157,9 @@ function appendProjectNode(data = {}) {
         <div class="dynamic-fields-container">
             <div class="input-grid">
                 <input type="text" class="proj-title" placeholder="Project Name / Nomenclature" value="${data.title || ''}">
-                <input type="text" class="proj-cat" placeholder="Category e.g., Web App" value="${data.category || ''}">
+                <input type="text" class="proj-cat" placeholder="Category e.g., Web App, Automation, CAD Model" value="${data.category || ''}">
                 <input type="text" class="proj-link" placeholder="Repository Execution Live Deploy Link" value="${data.link || ''}">
-                <textarea class="proj-desc" placeholder="Technical stack deployed...">${data.description || ''}</textarea>
+                <textarea class="proj-desc" placeholder="Technical stack deployed, algorithms engineered...">${data.description || ''}</textarea>
             </div>
         </div>
         <button type="button" class="btn-remove-node">🗑️</button>
@@ -166,8 +172,6 @@ if(document.getElementById('addEducationBtn')) document.getElementById('addEduca
 if(document.getElementById('addExperienceBtn')) document.getElementById('addExperienceBtn').addEventListener('click', () => appendExperienceNode());
 if(document.getElementById('addProjectBtn')) document.getElementById('addProjectBtn').addEventListener('click', () => appendProjectNode());
 
-// --- DATABASE SUBMISSION & SYNC HUB ---
-const form = document.getElementById('portfolioForm');
 if (form) {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -235,9 +239,9 @@ if (form) {
 
             alert("Data Sync Successful. Cloud records operating in optimal integrity states.");
         } catch(err) {
-            console.error("Transmission Error:", err);
-            alert("Transaction Aborted due to Cloud sync constraint.");
-        } finally {
+            console.error("Transmission Error Cluster Detected:", err);
+            alert("Transaction Aborted: Cloud system deployment encountered sync constraints.");
+        } finally { 
             sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
         }
     });
@@ -285,6 +289,8 @@ async function fetchPortfolioData(uid) {
                 const linkNode = document.getElementById('livePortfolioLink');
                 if (linkNode) { linkNode.href = liveLink; linkNode.style.display = 'block'; }
             }
+
+            if (form) form.dispatchEvent(new Event('input'));
         }
     } catch (err) { console.error("Data Fetch Error:", err); }
 }
@@ -295,14 +301,14 @@ function streamRecruiterMessages(uid) {
     const qBox = query(collection(db, "messages"), where("portfolioOwnerId", "==", uid), orderBy("timestamp", "desc"));
     onSnapshot(qBox, (snap) => {
         container.innerHTML = '';
-        if(snap.empty) { container.innerHTML = '<p class="placeholder-text" style="color: #64748b; font-style: italic;">Inbound mailbox clean.</p>'; return; }
+        if(snap.empty) { container.innerHTML = '<p class="placeholder-text">Inbound mailbox clean.</p>'; return; }
         snap.forEach(mDoc => {
             const m = mDoc.data();
             const div = document.createElement('div'); div.className = 'inbox-msg-card';
             div.innerHTML = `
-                <div class="msg-meta"><strong>${m.name}</strong><a href="mailto:${m.email}" style="color: #0ea5e9; text-decoration:none;">${m.email}</a></div>
-                <p style="margin:8px 0; font-size:14px; color:#334155; line-height:1.5;">${m.message}</p>
-                <button class="btn-delete-msg" data-id="${mDoc.id}" style="background:none; border:none; color:#ef4444; padding:0; cursor:pointer; font-weight:600; font-size:12px;">🗑️ Purge Entry Record</button>
+                <div class="msg-meta"><strong>${m.name}</strong><a href="mailto:${m.email}">${m.email}</a></div>
+                <p style="margin:8px 0; font-size:13px; color:#334155;">${m.message}</p>
+                <button class="btn-delete-msg" data-id="${mDoc.id}">🗑️ Purge Entry Record</button>
             `;
             div.querySelector('.btn-delete-msg').addEventListener('click', async () => {
                 if(confirm("Confirm deletion?")) { await deleteDoc(doc(db, "messages", mDoc.id)); }
