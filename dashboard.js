@@ -19,19 +19,13 @@ let currentUid = null;
 let uploadedImageUrl = ""; 
 let cropperInstance = null; 
 
-// Base64 Placeholder Tracker to avoid overwriting clean image loops
 let existingAvatarUrl = "https://via.placeholder.com/150";
 
-// GitHub URL Segment Dynamic Resolver Utility
 function generateLiveLink(slug) {
     const origin = window.location.origin;
-    const pathname = window.location.pathname;
-    
     if (origin.includes("github.io")) {
-        // GitHub Pages repository base naming fix configuration path
         return `${origin}/Dynamic-Portfolio-Builder/portfolio.html?user=${slug}`;
     } else {
-        // Localhost development routing configuration standard paths
         return `${origin}/portfolio.html?user=${slug}`;
     }
 }
@@ -51,7 +45,6 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
     signOut(auth).then(() => { window.location.href = "index.html"; });
 });
 
-// Real-time Preview Engine Hooks
 const form = document.getElementById('portfolioForm');
 form.addEventListener('input', () => {
     document.getElementById('prevName').innerText = document.getElementById('fullName').value || "Professional Name";
@@ -59,7 +52,6 @@ form.addEventListener('input', () => {
     document.getElementById('prevBio').innerText = document.getElementById('bio').value || "Summary framework context output canvas.";
 });
 
-// --- ADVANCED IMAGE CROPPING SYSTEM ENGINE HANDLERS ---
 const avatarUploadInput = document.getElementById('avatarUpload');
 const cropperModalOverlay = document.getElementById('cropperModalOverlay');
 const cropperRawImageFrame = document.getElementById('cropperRawImageFrame');
@@ -90,16 +82,11 @@ avatarUploadInput.addEventListener('change', (e) => {
 
 document.getElementById('btnExecuteCropOperation').addEventListener('click', () => {
     if (cropperInstance) {
-        const canvas = cropperInstance.getClippedCanvas({
-            width: 300,
-            height: 300
-        });
-
+        const canvas = cropperInstance.getClippedCanvas({ width: 300, height: 300 });
         if (canvas) {
             uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); 
             document.getElementById('prevAvatar').src = uploadedImageUrl; 
         }
-        
         cropperInstance.destroy();
         cropperInstance = null;
         cropperModalOverlay.style.display = 'none';
@@ -115,8 +102,6 @@ document.getElementById('btnCancelCropOperation').addEventListener('click', () =
     avatarUploadInput.value = ""; 
 });
 
-
-// Dynamic Injections Methods
 function appendEducationNode(data = {}) {
     const parent = document.getElementById('educationContainer');
     const div = document.createElement('div'); div.className = 'dynamic-item-row';
@@ -174,7 +159,6 @@ document.getElementById('addEducationBtn').addEventListener('click', () => appen
 document.getElementById('addExperienceBtn').addEventListener('click', () => appendExperienceNode());
 document.getElementById('addProjectBtn').addEventListener('click', () => appendProjectNode());
 
-// Form Processing Submissions Engine
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const sBtn = document.getElementById('submitFormBtn');
@@ -233,7 +217,6 @@ form.addEventListener('submit', async (e) => {
         await setDoc(doc(db, "portfolios", currentUid), payload, { merge: true });
         await setDoc(doc(db, "slugs", slug), { ownerId: currentUid });
 
-        // Update link dynamic routing logic
         const liveLink = generateLiveLink(slug);
         const linkNode = document.getElementById('livePortfolioLink');
         linkNode.href = liveLink; linkNode.style.display = 'block';
@@ -242,7 +225,7 @@ form.addEventListener('submit', async (e) => {
     } catch(err) {
         console.error("Transmission Error Cluster Detected:", err);
         alert("Transaction Aborted: Cloud system deployment encountered sync constraints.");
-    } finally {
+    } finaly {
         sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
     }
 });
@@ -270,7 +253,9 @@ async function fetchPortfolioData(uid) {
             document.getElementById('githubUrl').value = d.github || '';
             document.getElementById('twitterUrl').value = d.twitter || '';
             document.getElementById('techSkills').value = d.skills || '';
-            document.getElementById('prevViews').innerText = d.views || 0;
+            if(document.getElementById('prevViews')) {
+                document.getElementById('prevViews').innerText = d.views || 0;
+            }
 
             document.getElementById('educationContainer').innerHTML = '';
             document.getElementById('experienceContainer').innerHTML = '';
@@ -305,10 +290,10 @@ function streamRecruiterMessages(uid) {
                 <p style="margin:8px 0; font-size:13px; color:#334155;">${m.message}</p>
                 <button class="btn-delete-msg" data-id="${mDoc.id}">🗑️ Purge Entry Record</button>
             `;
-            div.querySelector('.btn-delete-msg').addEventListener('click', async (e) => {
+            div.querySelector('.btn-delete-msg').addEventListener('click', async () => {
                 if(confirm("Confirm deletion?")) { await deleteDoc(doc(db, "messages", mDoc.id)); }
             });
             container.appendChild(div);
         });
     });
-        }
+}
