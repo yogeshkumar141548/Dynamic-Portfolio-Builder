@@ -252,11 +252,15 @@ async function fetchPortfolioData(uid) {
             document.getElementById('techSkills').value = d.skills || '';
             document.getElementById('prevViews').innerText = d.views || 0;
 
+            // Clear containers to prevent duplicate appends on refresh loops
+            document.getElementById('educationContainer').innerHTML = '';
+            document.getElementById('experienceContainer').innerHTML = '';
+            document.getElementById('projectContainer').innerHTML = '';
+
             if(d.education) d.education.forEach(item => appendEducationNode(item));
             if(d.experiences) d.experiences.forEach(item => appendExperienceNode(item));
             if(d.projects) d.projects.forEach(item => appendProjectNode(item));
 
-            // Set the view link immediately on data fetch load
             if (d.slug) {
                 const liveLink = `${window.location.origin}/portfolio.html?user=${d.slug}`;
                 const linkNode = document.getElementById('livePortfolioLink');
@@ -288,5 +292,4 @@ function streamRecruiterMessages(uid) {
             container.appendChild(div);
         });
     });
-                                    }
-              
+}
