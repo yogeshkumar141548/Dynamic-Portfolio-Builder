@@ -17,238 +17,249 @@ const db = getFirestore(app);
 
 let currentUid = null;
 let uploadedImageUrl = ""; 
+let cropperInstance = null; // Holds the active Cropper state loop
 
 onAuthStateChanged(auth, (user) => {
-    // FIXED: GitHub Pages path redirection fixed
-    if (user) { currentUid = user.uid; loadExistingUserData(currentUid); streamRecruiterMessages(currentUid); } 
-    else { window.location.href = "./index.html"; }
-});
-
-const form = document.getElementById('portfolioForm');
-const projectsContainer = document.getElementById('projectsContainer');
-const experienceContainer = document.getElementById('experienceContainer');
-const educationContainer = document.getElementById('educationContainer');
-const certsContainer = document.getElementById('certsContainer');
-const imageInput = document.getElementById('imageInput');
-const uploadStatus = document.getElementById('uploadStatus');
-const dashAvatarPreview = document.getElementById('dashAvatarPreview');
-const prevAvatar = document.getElementById('prevAvatar');
-
-// AUTOMATIC CANVAS IMAGE COMPRESSION ENGINE
-imageInput.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const localPreviewUrl = URL.createObjectURL(file);
-    dashAvatarPreview.src = localPreviewUrl;
-    if(prevAvatar) prevAvatar.src = localPreviewUrl;
-
-    uploadStatus.innerText = "⚡ Processing and compressing image asset...";
-    uploadStatus.style.color = "#2563eb";
-
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            const MAX_WIDTH = 300;
-            const MAX_HEIGHT = 300;
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-                if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-            } else {
-                if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-
-            uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.6);
-            
-            dashAvatarPreview.src = uploadedImageUrl;
-            if(prevAvatar) prevAvatar.src = uploadedImageUrl;
-            
-            uploadStatus.innerText = "✅ Image compressed successfully! Size optimized to safe zone.";
-            uploadStatus.style.color = "#10b981";
-        };
-    };
-    reader.readAsDataURL(file);
-});
-
-document.getElementById('addProjectBtn').addEventListener('click', () => { addProjectFieldGroup(); });
-document.getElementById('addExpBtn').addEventListener('click', () => { addExperienceFieldGroup(); });
-document.getElementById('addEduBtn').addEventListener('click', () => { addEducationFieldGroup(); });
-document.getElementById('addCertBtn').addEventListener('click', () => { addCertFieldGroup(); });
-
-function addEducationFieldGroup(data = {degree:'', school:'', duration:''}) {
-    const div = document.createElement('div'); div.className = 'entry-box';
-    div.innerHTML = `<input type="text" class="edu-degree" placeholder="Degree / Qualification (e.g., BCA)" value="${data.degree || ''}" required><input type="text" class="edu-school" placeholder="Institution / University Name" value="${data.school || data.institute || ''}" required><input type="text" class="edu-duration" placeholder="Duration Frame (e.g., 2023 - 2026)" value="${data.duration || data.timeline || ''}" required><button type="button" class="btn-danger" style="padding:2px 6px; font-size:11px; position:absolute; top:10px; right:10px; border-radius:3px;" onclick="this.parentElement.remove()">X</button>`;
-    educationContainer.appendChild(div);
-}
-
-function addCertFieldGroup(data = {title:'', issuer:''}) {
-    const div = document.createElement('div'); div.className = 'entry-box';
-    div.innerHTML = `<input type="text" class="cert-title" placeholder="Certification / License Title" value="${data.title || ''}" required><input type="text" class="cert-issuer" placeholder="Issuing Authority" value="${data.issuer || ''}" required><button type="button" class="btn-danger" style="padding:2px 6px; font-size:11px; position:absolute; top:10px; right:10px; border-radius:3px;" onclick="this.parentElement.remove()">X</button>`;
-    certsContainer.appendChild(div);
-}
-
-function addExperienceFieldGroup(data = {role:'', company:'', duration:'', desc:''}) {
-    const div = document.createElement('div'); div.className = 'entry-box';
-    div.innerHTML = `<input type="text" class="exp-role" placeholder="Job Title" value="${data.role || ''}" required><input type="text" class="exp-company" placeholder="Company Name" value="${data.company || ''}" required><input type="text" class="exp-duration" placeholder="Duration" value="${data.duration || data.timeline || ''}" required><textarea class="exp-desc" placeholder="Job Responsibilities">${data.desc || data.description || ''}</textarea><button type="button" class="btn-danger" style="padding:2px 6px; font-size:11px; position:absolute; top:10px; right:10px; border-radius:3px;" onclick="this.parentElement.remove()">X</button>`;
-    experienceContainer.appendChild(div);
-}
-
-function addProjectFieldGroup(data = {title:'', cat:'', link:'', desc:''}) {
-    const div = document.createElement('div'); div.className = 'entry-box';
-    div.innerHTML = `<input type="text" class="proj-title" placeholder="Project Title" value="${data.title || ''}" required><input type="text" class="proj-category" placeholder="Category" value="${data.cat || data.category || ''}" required><input type="url" class="proj-link" placeholder="Repository URL" value="${data.link || ''}"><textarea class="proj-desc" placeholder="Component Details">${data.desc || data.description || ''}</textarea><button type="button" class="btn-danger" style="padding:2px 6px; font-size:11px; position:absolute; top:10px; right:10px; border-radius:3px;" onclick="this.parentElement.remove()">X</button>`;
-    projectsContainer.appendChild(div);
-}
-
-form.addEventListener('input', () => {
-    if(document.getElementById('prevName')) document.getElementById('prevName').innerText = document.getElementById('fullName').value;
-    if(document.getElementById('prevTitle')) document.getElementById('prevTitle').innerText = document.getElementById('jobTitle').value;
-    if(document.getElementById('prevBio')) document.getElementById('prevBio').innerText = document.getElementById('bio').value;
-    const skillsContainer = document.getElementById('prevSkills');
-    if(skillsContainer) {
-        skillsContainer.innerHTML = '';
-        document.getElementById('techSkills').value.split(',').forEach(s => {
-            if(s.trim()) {
-                const b = document.createElement('span'); b.className = 'badge'; b.innerText = s.trim();
-                skillsContainer.appendChild(b);
-            }
-        });
+    if (user) {
+        currentUid = user.uid;
+        document.getElementById('userEmailDisplay').innerText = user.email;
+        fetchPortfolioData(user.uid);
+        streamRecruiterMessages(user.uid);
+    } else {
+        window.location.href = "index.html";
     }
 });
 
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    signOut(auth).then(() => { window.location.href = "index.html"; });
+});
+
+// Real-time Preview Engine Hooks
+const form = document.getElementById('portfolioForm');
+form.addEventListener('input', () => {
+    document.getElementById('prevName').innerText = document.getElementById('fullName').value || "Professional Name";
+    document.getElementById('prevTitle').innerText = document.getElementById('jobTitle').value || "Headline Structure";
+    document.getElementById('prevBio').innerText = document.getElementById('bio').value || "Summary framework context output canvas.";
+});
+
+// --- UPDATED: ADVANCED IMAGE CROPPING SYSTEM ENGINE HANDLERS ---
+const avatarUploadInput = document.getElementById('avatarUpload');
+const cropperModalOverlay = document.getElementById('cropperModalOverlay');
+const cropperRawImageFrame = document.getElementById('cropperRawImageFrame');
+
+avatarUploadInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            cropperRawImageFrame.src = event.target.result;
+            cropperModalOverlay.style.display = 'flex'; // Modal window display layer open
+
+            // Dynamic instance resolution to prevent multi-layer overlay leaks
+            if (cropperInstance) {
+                cropperInstance.destroy();
+            }
+
+            // Initialization parameter variables mapping profile dimensions criteria (1:1)
+            cropperInstance = new Cropper(cropperRawImageFrame, {
+                aspectRatio: 1,
+                viewMode: 1,
+                background: false,
+                autoCropArea: 1,
+                responsive: true
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// Apply Crop Layout Operation handler
+document.getElementById('btnExecuteCropOperation').addEventListener('click', () => {
+    if (cropperInstance) {
+        // High-resolution canvas extraction for professional avatars
+        const canvas = cropperInstance.getClippedCanvas({
+            width: 300,
+            height: 300
+        });
+
+        if (canvas) {
+            uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); // Dynamic compression state tracking optimization
+            document.getElementById('prevAvatar').src = uploadedImageUrl; // Local realtime workspace refresh
+        }
+        
+        // Clean and terminate current overlay process blocks
+        cropperInstance.destroy();
+        cropperInstance = null;
+        cropperModalOverlay.style.display = 'none';
+    }
+});
+
+// Cancel UI sequence handler
+document.getElementById('btnCancelCropOperation').addEventListener('click', () => {
+    if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+    }
+    cropperModalOverlay.style.display = 'none';
+    avatarUploadInput.value = ""; // Clear parameters array values configuration states
+});
+
+
+// Dynamic Injections Methods
+function appendEducationNode(data = {}) {
+    const parent = document.getElementById('educationContainer');
+    const div = document.createElement('div'); div.className = 'dynamic-item-row';
+    div.innerHTML = `
+        <div class="dynamic-fields-container">
+            <div class="input-grid">
+                <input type="text" class="edu-inst" placeholder="Institution / University" value="${data.institute || ''}">
+                <input type="text" class="edu-deg" placeholder="Degree / Qualification" value="${data.degree || ''}">
+                <input type="text" class="edu-time" placeholder="Timeline e.g., 2022 - 2026" value="${data.timeline || ''}">
+            </div>
+        </div>
+        <button type="button" class="btn-remove-node">🗑️</button>
+    `;
+    div.querySelector('.btn-remove-node').addEventListener('click', () => div.remove());
+    parent.appendChild(div);
+}
+
+function appendExperienceNode(data = {}) {
+    const parent = document.getElementById('experienceContainer');
+    const div = document.createElement('div'); div.className = 'dynamic-item-row';
+    div.innerHTML = `
+        <div class="dynamic-fields-container">
+            <div class="input-grid">
+                <input type="text" class="exp-comp" placeholder="Enterprise Name" value="${data.company || ''}">
+                <input type="text" class="exp-role" placeholder="Designation Title" value="${data.role || ''}">
+                <input type="text" class="exp-time" placeholder="Timeline e.g., 2025 - Present" value="${data.timeline || ''}">
+                <textarea class="exp-desc" placeholder="Operational Milestones R&D Tasks">${data.description || ''}</textarea>
+            </div>
+        </div>
+        <button type="button" class="btn-remove-node">🗑️</button>
+    `;
+    div.querySelector('.btn-remove-node').addEventListener('click', () => div.remove());
+    parent.appendChild(div);
+}
+
+function appendProjectNode(data = {}) {
+    const parent = document.getElementById('projectContainer');
+    const div = document.createElement('div'); div.className = 'dynamic-item-row';
+    div.innerHTML = `
+        <div class="dynamic-fields-container">
+            <div class="input-grid">
+                <input type="text" class="proj-title" placeholder="Project Name / Nomenclature" value="${data.title || ''}">
+                <input type="text" class="proj-cat" placeholder="Category e.g., Web App, Automation, CAD Model" value="${data.category || ''}">
+                <input type="text" class="proj-link" placeholder="Repository Execution Live Deploy Link" value="${data.link || ''}">
+                <textarea class="proj-desc" placeholder="Technical stack deployed, algorithms engineered...">${data.description || ''}</textarea>
+            </div>
+        </div>
+        <button type="button" class="btn-remove-node">🗑️</button>
+    `;
+    div.querySelector('.btn-remove-node').addEventListener('click', () => div.remove());
+    parent.appendChild(div);
+}
+
+document.getElementById('addEducationBtn').addEventListener('click', () => appendEducationNode());
+document.getElementById('addExperienceBtn').addEventListener('click', () => appendExperienceNode());
+document.getElementById('addProjectBtn').addEventListener('click', () => appendProjectNode());
+
+// Form Processing Submissions Engine
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!currentUid) return;
-    
-    const saveBtn = document.getElementById('submitFormBtn');
-    saveBtn.innerText = "Synchronizing Data Matrix...";
-    saveBtn.disabled = true;
+    const sBtn = document.getElementById('submitFormBtn');
+    sBtn.innerText = "Transmitting Configurations to Cloud Matrix..."; sBtn.disabled = true;
 
-    const slug = document.getElementById('customSlug').value.toLowerCase().replace(/[^a-z0-9.-]/g, "");
-    const finalAvatar = uploadedImageUrl || dashAvatarPreview.src || "https://via.placeholder.com/150";
+    let rawSlug = document.getElementById('profileSlug').value.trim().toLowerCase();
+    let slug = rawSlug.replace(/[^a-z0-9-_]/g, '-');
+    if(!slug) slug = "portfolio-user";
+
+    const education = [];
+    document.querySelectorAll('#educationContainer .dynamic-item-row').forEach(row => {
+        const inst = row.querySelector('.edu-inst').value.trim();
+        if(inst) education.push({ institute: inst, degree: row.querySelector('.edu-deg').value.trim(), timeline: row.querySelector('.edu-time').value.trim() });
+    });
+
+    const experiences = [];
+    document.querySelectorAll('#experienceContainer .dynamic-item-row').forEach(row => {
+        const comp = row.querySelector('.exp-comp').value.trim();
+        if(comp) experiences.push({ company: comp, role: row.querySelector('.exp-role').value.trim(), timeline: row.querySelector('.exp-time').value.trim(), description: row.querySelector('.exp-desc').value.trim() });
+    });
+
+    const projects = [];
+    document.querySelectorAll('#projectContainer .dynamic-item-row').forEach(row => {
+        const title = row.querySelector('.proj-title').value.trim();
+        if(title) projects.push({ title: title, category: row.querySelector('.proj-cat').value.trim() || 'General', link: row.querySelector('.proj-link').value.trim(), description: row.querySelector('.proj-desc').value.trim() });
+    });
 
     const payload = {
         isMaintenanceActive: document.getElementById('maintenanceToggle').checked,
         theme: document.getElementById('themeSelect').value,
         slug: slug,
-        avatar: finalAvatar,
-        name: document.getElementById('fullName').value,
-        title: document.getElementById('jobTitle').value,
-        bio: document.getElementById('bio').value,
-        phone: document.getElementById('phoneNumber').value.trim(),
-        email: document.getElementById('publicEmail').value.trim(), 
-        location: document.getElementById('location').value.trim(),
+        avatar: uploadedImageUrl || document.getElementById('prevAvatar').src || "",
+        name: document.getElementById('fullName').value.trim(),
+        title: document.getElementById('jobTitle').value.trim(),
+        location: document.getElementById('locationStr').value.trim(),
+        bio: document.getElementById('bio').value.trim(),
+        email: document.getElementById('contactEmail').value.trim(),
+        phone: document.getElementById('contactPhone').value.trim(),
         linkedin: document.getElementById('linkedinUrl').value.trim(),
         github: document.getElementById('githubUrl').value.trim(),
         twitter: document.getElementById('twitterUrl').value.trim(),
-        skills: document.getElementById('techSkills').value, 
-        coreCompetencies: document.getElementById('coreCompetencies').value.split(',').map(s=>s.trim()).filter(s=>s.length > 0),
-        education: Array.from(document.querySelectorAll('#educationContainer .entry-box')).map(edu => ({ 
-            degree: edu.querySelector('.edu-degree').value, 
-            institute: edu.querySelector('.edu-school').value, 
-            timeline: edu.querySelector('.edu-duration').value 
-        })),
-        experiences: Array.from(document.querySelectorAll('#experienceContainer .entry-box')).map(e => ({ 
-            role: e.querySelector('.exp-role').value, 
-            company: e.querySelector('.exp-company').value, 
-            timeline: e.querySelector('.exp-duration').value, 
-            description: e.querySelector('.exp-desc').value 
-        })),
-        certifications: Array.from(document.querySelectorAll('#certsContainer .entry-box')).map(c => ({ 
-            title: c.querySelector('.cert-title').value, 
-            issuer: c.querySelector('.cert-issuer').value 
-        })),
-        projects: Array.from(document.querySelectorAll('#projectsContainer .entry-box')).map(p => ({ 
-            title: p.querySelector('.proj-title').value, 
-            category: p.querySelector('.proj-category').value, 
-            link: p.querySelector('.proj-link').value, 
-            description: p.querySelector('.proj-desc').value 
-        }))
+        skills: document.getElementById('techSkills').value.trim(),
+        education,
+        experiences,
+        projects
     };
 
     try {
-        await setDoc(doc(db, "portfolios", currentUid), payload, { merge: true });
-        await setDoc(doc(db, "slugs", slug), { ownerId: currentUid }); 
-        
-        const liveLink = document.getElementById('livePortfolioLink');
-        if(liveLink) {
-            liveLink.href = `portfolio.html?user=${slug}`;
-            liveLink.style.display = 'block';
+        const slugCheck = await getDoc(doc(db, "slugs", slug));
+        if (slugCheck.exists() && slugCheck.data().ownerId !== currentUid) {
+            alert("This Custom Routing URL slug is already mapped to another profile matrix. Please pick an alternative slug identifier string.");
+            sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
+            return;
         }
 
-        saveBtn.innerText = "Update & Save Portfolio Data";
-        if(document.getElementById('systemModeBanner')) document.getElementById('systemModeBanner').style.display = 'block';
+        await setDoc(doc(db, "portfolios", currentUid), payload, { merge: true });
+        await setDoc(doc(db, "slugs", slug), { ownerId: currentUid });
 
-        alert("Portfolio parameters synchronized cleanly!");
-    } catch (err) { 
-        console.error("Database Save Failure:", err); 
-        alert("Firestore Payload Size Overflow: Database entry dropped. Try uploading a compressed or smaller image!");
+        const liveLink = `${window.location.origin}/portfolio.html?user=${slug}`;
+        const linkNode = document.getElementById('livePortfolioLink');
+        linkNode.href = liveLink; linkNode.style.display = 'block';
+
+        alert("Data Sync Successful. Cloud records operating in optimal integrity states.");
+    } catch(err) {
+        console.error("Transmission Error Cluster Detected:", err);
+        alert("Transaction Aborted: Cloud system deployment encountered sync constraints.");
     } finally {
-        saveBtn.disabled = false;
+        sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
     }
 });
 
-async function loadExistingUserData(uid) {
+async function fetchPortfolioData(uid) {
     try {
-        const snap = await getDoc(doc(db, "portfolios", uid));
-        if (snap.exists()) {
-            const d = snap.data();
+        const docSnap = await getDoc(doc(db, "portfolios", uid));
+        if(docSnap.exists()) {
+            const d = docSnap.data();
             document.getElementById('maintenanceToggle').checked = d.isMaintenanceActive || false;
-            document.getElementById('customSlug').value = d.slug || '';
-            document.getElementById('themeSelect').value = d.theme || 'light';
+            document.getElementById('themeSelect').value = d.theme || 'theme-light';
+            document.getElementById('profileSlug').value = d.slug || '';
+            if(d.avatar) { uploadedImageUrl = d.avatar; document.getElementById('prevAvatar').src = d.avatar; }
             document.getElementById('fullName').value = d.name || '';
             document.getElementById('jobTitle').value = d.title || '';
+            document.getElementById('locationStr').value = d.location || '';
             document.getElementById('bio').value = d.bio || '';
-            
-            document.getElementById('phoneNumber').value = d.phone || '';
-            document.getElementById('publicEmail').value = d.email || '';
-            document.getElementById('location').value = d.location || '';
-            
+            document.getElementById('contactEmail').value = d.email || '';
+            document.getElementById('contactPhone').value = d.phone || '';
             document.getElementById('linkedinUrl').value = d.linkedin || '';
             document.getElementById('githubUrl').value = d.github || '';
             document.getElementById('twitterUrl').value = d.twitter || '';
-
             document.getElementById('techSkills').value = d.skills || '';
-            document.getElementById('coreCompetencies').value = d.coreCompetencies ? d.coreCompetencies.join(', ') : '';
-            if(document.getElementById('totalViews')) document.getElementById('totalViews').innerText = d.views || 0;
-            
-            if (d.avatar && d.avatar !== "https://via.placeholder.com/150") {
-                uploadedImageUrl = d.avatar; 
-                dashAvatarPreview.src = d.avatar; 
-                if(prevAvatar) prevAvatar.src = d.avatar;
-            }
-            
-            educationContainer.innerHTML = '<h3>Academic Education History</h3>';
-            if(d.education) { d.education.forEach(edu => addEducationFieldGroup(edu)); }
+            document.getElementById('prevViews').innerText = d.views || 0;
 
-            experienceContainer.innerHTML = '<h3>Professional Experience Modules</h3>';
-            if(d.experiences) { d.experiences.forEach(e => addExperienceFieldGroup(e)); }
-            
-            certsContainer.innerHTML = '<h3>Certifications & Technical Licenses</h3>';
-            if(d.certifications) { d.certifications.forEach(c => addCertFieldGroup(c)); }
+            if(d.education) d.education.forEach(item => appendEducationNode(item));
+            if(d.experiences) d.experiences.forEach(item => appendExperienceNode(item));
+            if(d.projects) d.projects.forEach(item => appendProjectNode(item));
 
-            projectsContainer.innerHTML = '<h3>Interactive Showcase Projects</h3>';
-            if(d.projects) { d.projects.forEach(p => addProjectFieldGroup(p)); }
-            
-            if(d.slug) {
-                const liveLink = document.getElementById('livePortfolioLink');
-                if(liveLink) {
-                    liveLink.href = `portfolio.html?user=${d.slug}`;
-                    liveLink.style.display = 'block';
-                }
-                document.getElementById('submitFormBtn').innerText = "Update & Save Portfolio Data";
-                if(document.getElementById('systemModeBanner')) document.getElementById('systemModeBanner').style.display = 'block';
-            }
             form.dispatchEvent(new Event('input'));
         }
     } catch (err) { console.error("Data Fetch Error:", err); }
@@ -258,7 +269,6 @@ function streamRecruiterMessages(uid) {
     const qBox = query(collection(db, "messages"), where("portfolioOwnerId", "==", uid), orderBy("timestamp", "desc"));
     onSnapshot(qBox, (snap) => {
         const container = document.getElementById('messagesInboxContainer');
-        if(!container) return;
         container.innerHTML = '';
         if(snap.empty) { container.innerHTML = '<p class="placeholder-text">Inbound mailbox clean.</p>'; return; }
         snap.forEach(mDoc => {
@@ -266,16 +276,13 @@ function streamRecruiterMessages(uid) {
             const div = document.createElement('div'); div.className = 'inbox-msg-card';
             div.innerHTML = `
                 <div class="msg-meta"><strong>${m.name}</strong><a href="mailto:${m.email}">${m.email}</a></div>
-                <p style="margin:8px 0; font-size:13px; color:#334155;">${m.message}</p>
+                <p style=\"margin:8px 0; font-size:13px; color:#334155;\">${m.message}</p>
                 <button class="btn-delete-msg" data-id="${mDoc.id}">🗑️ Purge Entry Record</button>
             `;
             div.querySelector('.btn-delete-msg').addEventListener('click', async (e) => {
-                if(confirm("Confirm deletion?")) { await deleteDoc(doc(db, "messages", e.target.getAttribute('data-id'))); }
+                if(confirm("Confirm deletion?")) { await deleteDoc(doc(db, "messages", mDoc.id)); }
             });
             container.appendChild(div);
         });
     });
-}
-
-// FIXED: Logout relative path redirection fixed
-document.getElementById('logoutBtn').addEventListener('click', () => { signOut(auth).then(()=> window.location.href="./index.html"); });
+                                    }
