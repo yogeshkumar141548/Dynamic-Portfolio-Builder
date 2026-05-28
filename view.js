@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, updateDoc, increment, arrayUnion, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyArb86FC6-vIX9OQ7ir1adDEmtc27Ksq4k",
@@ -59,122 +59,85 @@ async function fetchAndBuildPortfolio(uid) {
     }
 }
 
+// Global Core DOM Rendering Pipeline Framework
 function buildDOM(d) {
-    const activeTheme = d.theme || 'light';
-    if (activeTheme.startsWith('theme-')) {
-        document.body.className = activeTheme;
+    // --- FIXED: THEME CLASS DYNAMICALLY ENFORCED ON THE BODY CONTAINER ---
+    if (d.theme) {
+        document.body.className = d.theme;
     } else {
-        document.body.className = `theme-${activeTheme}`;
+        document.body.className = 'theme-light';
     }
     
-    const avatarFrame = document.getElementById('viewAvatar');
-    if(avatarFrame) {
-        if(d.avatar) { avatarFrame.src = d.avatar; } else { avatarFrame.style.display = 'none'; }
-    }
+    // Core Parameters Toggling visibility natively if empty
+    const avatarFrame = document.getElementById('portfolioAvatar');
+    if(d.avatar) { avatarFrame.src = d.avatar; } else { avatarFrame.style.display = 'none'; }
 
-    const nameNode = document.getElementById('viewName');
-    if(nameNode) {
-        if(d.name) { nameNode.innerText = d.name; document.title = `${d.name} | Professional Identity Matrix`; } else { nameNode.style.display = 'none'; }
-    }
+    const nameNode = document.getElementById('ownerName');
+    if(d.name) { nameNode.innerText = d.name; document.title = `${d.name} | Professional Identity Matrix`; } else { nameNode.style.display = 'none'; }
     
-    const titleNode = document.getElementById('viewTitle');
-    if(titleNode) {
-        if(d.title) { titleNode.innerText = d.title; } else { titleNode.style.display = 'none'; }
-    }
+    const titleNode = document.getElementById('ownerTitle');
+    if(d.title) { titleNode.innerText = d.title; } else { titleNode.style.display = 'none'; }
 
-    const bioNode = document.getElementById('viewBio');
-    if(bioNode) {
-        if(d.bio) { bioNode.innerText = d.bio; } else { bioNode.style.display = 'none'; }
-    }
+    const locNode = document.getElementById('ownerLocation');
+    if(d.location) { locNode.innerHTML = `📍 ${d.location}`; } else { locNode.style.display = 'none'; }
 
-    const contactCard = document.getElementById('contactInfoCard');
-    const contactBlock = document.getElementById('contactDetailsBlock');
-    if(contactBlock) {
-        contactBlock.innerHTML = '';
-        let hasContact = false;
+    const bioNode = document.getElementById('ownerBio');
+    if(d.bio) { bioNode.innerText = d.bio; } else { bioNode.style.display = 'none'; }
 
-        if(d.location) {
-            hasContact = true;
-            contactBlock.innerHTML += `<div class="contact-item"><i class="contact-icon">📍</i><span>${d.location}</span></div>`;
-        }
-        if(d.email) {
-            hasContact = true;
-            contactBlock.innerHTML += `<div class="contact-item"><i class="contact-icon">✉️</i><a href="mailto:${d.email}">${d.email}</a></div>`;
-        }
-        if(d.phone) {
-            hasContact = true;
-            contactBlock.innerHTML += `<div class="contact-item"><i class="contact-icon">📞</i><a href="tel:${d.phone}">${d.phone}</a></div>`;
-        }
+    // Dynamic Context Channels Toggles
+    const emNode = document.getElementById('metaEmail');
+    if(d.email) { emNode.innerText = d.email; emNode.href = `mailto:${d.email}`; } else { document.getElementById('emailRow')?.remove(); }
+    
+    const phNode = document.getElementById('metaPhone');
+    if(d.phone) { phNode.innerText = d.phone; phNode.href = `tel:${d.phone}`; } else { document.getElementById('phoneRow')?.remove(); }
 
-        if(contactCard && hasContact) contactCard.style.display = 'block';
-    }
+    const liNode = document.getElementById('linkLinkedin');
+    if(d.linkedin) { liNode.href = d.linkedin; } else { liNode?.remove(); }
 
-    const deck = document.getElementById('viewSocialDeck');
-    if(deck) {
-        deck.innerHTML = '';
-        if(d.linkedin) deck.innerHTML += `<a href="${d.linkedin}" target="_blank" class="social-pill">LinkedIn</a>`;
-        if(d.github) deck.innerHTML += `<a href="${d.github}" target="_blank" class="social-pill">GitHub</a>`;
-        if(d.twitter) deck.innerHTML += `<a href="${d.twitter}" target="_blank" class="social-pill">Twitter/X</a>`;
-    }
+    const ghNode = document.getElementById('linkGithub');
+    if(d.github) { ghNode.href = d.github; } else { ghNode?.remove(); }
 
+    const twNode = document.getElementById('linkTwitter');
+    if(d.twitter) { twNode.href = d.twitter; } else { twNode?.remove(); }
+
+    // Skills Badges Array Processing
     const sGroup = document.getElementById('techSkillsContainer');
-    if(sGroup) {
+    if (sGroup) {
         sGroup.innerHTML = '';
         if (d.skills && d.skills.trim() !== "") {
             d.skills.split(',').forEach(s => {
                 if(s.trim() === "") return;
-                const span = document.createElement('span'); span.className = 'badge-pill'; span.innerText = s.trim();
+                const span = document.createElement('span'); span.className = 'skill-badge-item'; span.innerText = s.trim();
                 sGroup.appendChild(span);
             });
+        } else {
+            document.querySelector('.skills-card-aside')?.remove();
         }
     }
 
-    const compGroup = document.getElementById('coreCompetenciesContainer');
-    if(compGroup) {
-        compGroup.innerHTML = '';
-        if(d.coreCompetencies && d.coreCompetencies.length > 0) {
-            d.coreCompetencies.forEach(c => {
-                const span = document.createElement('span'); span.className = 'badge-pill'; span.innerText = c;
-                compGroup.appendChild(span);
-            });
-        }
-    }
-
-    const eduCard = document.getElementById('eduCardView');
-    const eduBox = document.getElementById('educationViewBlock');
-    if(eduBox) {
+    // Education Modules
+    const eduBox = document.getElementById('educationTimeline');
+    if (eduBox) {
         eduBox.innerHTML = '';
         if (d.education && d.education.length > 0) {
-            if(eduCard) eduCard.style.display = 'block';
             d.education.forEach(e => {
-                const block = document.createElement('div'); block.className = 'list-item';
-                block.innerHTML = `<div class="list-title">${e.degree}</div><div class="list-subtitle">${e.institute}</div><div class="list-meta">${e.timeline}</div>`;
+                const block = document.createElement('div'); block.className = 'timeline-node-block';
+                block.innerHTML = `<h5>${e.degree}</h5><p class="institution-meta-str">${e.institute}</p><span class="node-duration-span">${e.timeline}</span>`;
                 eduBox.appendChild(block);
             });
+        } else {
+            document.querySelector('.education-card-aside')?.remove();
         }
     }
 
-    const certCard = document.getElementById('certCardView');
-    const certBox = document.getElementById('certificationsViewBlock');
-    if(certBox) {
-        certBox.innerHTML = '';
-        if(d.certifications && d.certifications.length > 0) {
-            if(certCard) certCard.style.display = 'block';
-            d.certifications.forEach(c => {
-                const block = document.createElement('div'); block.className = 'list-item';
-                block.innerHTML = `<div class="list-title">${c.title}</div><div class="list-subtitle">${c.issuer}</div>`;
-                certBox.appendChild(block);
-            });
-        }
-    }
-
+    // Experience Cards
     const expBox = document.getElementById('experienceTimeline');
-    if(expBox) {
+    if (expBox) {
         expBox.innerHTML = '';
         if (d.experiences && d.experiences.length > 0) {
             d.experiences.forEach(ex => {
-                const block = document.createElement('div'); block.className = 'timeline-item';
-                block.innerHTML = `<div class="timeline-dot"></div><span class="timeline-duration">${ex.timeline}</span><div class="timeline-role">${ex.role}</div><div class="timeline-company">${ex.company}</div><p class="timeline-desc">${ex.description}</p>`;
+                const block = document.createElement('div'); block.className = 'timeline-node-block';
+                block.innerHTML = `<h5>${ex.role}</h5><p class="institution-meta-str">${ex.company}</p><span class="node-duration-span">${ex.timeline}</span><p style="margin-top:10px; font-size:14px; line-height:1.6; white-space:pre-wrap;">${ex.description}</p>`;
                 expBox.appendChild(block);
             });
         } else {
@@ -182,19 +145,20 @@ function buildDOM(d) {
         }
     }
 
+    // Projects Engineering Arrays
     const pGrid = document.getElementById('projectsGrid');
-    if(pGrid) {
+    if (pGrid) {
         pGrid.innerHTML = '';
         if (d.projects && d.projects.length > 0) {
             const categories = new Set(['all']);
             d.projects.forEach(p => {
                 categories.add(p.category.trim());
-                const card = document.createElement('div'); card.className = 'filter-item project-card'; card.setAttribute('data-cat', p.category.trim());
+                const card = document.createElement('div'); card.className = 'filter-item project-display-card'; card.setAttribute('data-cat', p.category.trim());
                 card.innerHTML = `
-                    <span class="category-tag">${p.category}</span>
-                    <div class="project-title">${p.title}</div>
-                    <p class="project-desc">${p.description}</p>
-                    ${p.link ? `<a href="${p.link}" target="_blank" class="project-link">Execute Operations ↗</a>` : ''}
+                    <span class="project-tag-pill">${p.category}</span>
+                    <h4>${p.title}</h4>
+                    <p style="font-size:13.5px; line-height:1.5; color:var(--text-muted); flex-grow:1; white-space:pre-wrap;">${p.description}</p>
+                    ${p.link ? `<a href="${p.link}" target="_blank" class="project-redirect-anchor">Execute Operations ↗</a>` : ''}
                 `;
                 pGrid.appendChild(card);
             });
@@ -207,36 +171,34 @@ function buildDOM(d) {
 
 function buildFilters(cats) {
     const fBox = document.getElementById('dynamicFilters');
-    if(!fBox) return;
-    fBox.innerHTML = '';
-    cats.forEach(c => {
-        const btn = document.createElement('button'); btn.className = 'filter-btn' + (c === 'all' ? ' active' : ''); btn.innerText = c.toUpperCase(); btn.setAttribute('data-target', c);
-        fBox.appendChild(btn);
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            const cat = e.target.getAttribute('data-target');
-            document.querySelectorAll('.filter-item').forEach(item => {
-                item.style.display = (cat === 'all' || item.getAttribute('data-cat') === cat) ? 'flex' : 'none';
+    if (fBox) {
+        fBox.innerHTML = '';
+        cats.forEach(c => {
+            const btn = document.createElement('button'); btn.className = 'filter-trigger-btn' + (c === 'all' ? ' active-filter' : ''); btn.innerText = c.toUpperCase(); btn.setAttribute('data-target', c);
+            fBox.appendChild(btn);
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-trigger-btn').forEach(b => b.classList.remove('active-filter'));
+                e.target.classList.add('active-filter');
+                const cat = e.target.getAttribute('data-target');
+                document.querySelectorAll('.filter-item').forEach(item => {
+                    item.style.display = (cat === 'all' || item.getAttribute('data-cat') === cat) ? 'flex' : 'none';
+                });
             });
         });
-    });
+    }
 }
 
 function setupContactForm(ownerUid) {
-    const cForm = document.getElementById('contactForm');
-    if(!cForm) return;
-    cForm.addEventListener('submit', async (e) => {
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const ack = document.getElementById('contactAck');
-        if(ack) { ack.innerText = "Transmitting message..."; ack.style.color = "var(--accent)"; }
+        ack.innerText = "Transmitting message..."; ack.style.color = "var(--accent)";
         try {
             await addDoc(collection(db, "messages"), {
                 portfolioOwnerId: ownerUid, name: document.getElementById('senderName').value, email: document.getElementById('senderEmail').value, message: document.getElementById('senderMsg').value, timestamp: serverTimestamp()
             });
-            if(ack) { ack.style.color = '#10b981'; ack.innerText = "Message sent successfully!"; }
-            e.target.reset();
-        } catch(err) { if(ack) { ack.style.color = '#dc2626'; ack.innerText = "Transmission failed. Please try again."; } }
+            ack.style.color = '#10b981'; ack.innerText = "Message sent successfully!"; e.target.reset();
+        } catch(err) { ack.style.color = '#dc2626'; ack.innerText = "Transmission failed. Please try again."; }
     });
 }
 
@@ -244,13 +206,9 @@ function renderErrorSplash(msg) {
     document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; background:#f8fafc; font-family:sans-serif; padding:20px; text-align:center;"><div style="background:white; border:1px solid #e2e8f0; padding:40px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.03); max-width:500px;"><h2 style="color:#0f172a; margin-top:0;">Portfolio Interface Management</h2><p style="color:#64748b; line-height:1.6; font-size:15px;">${msg}</p></div></div>`;
 }
 
-const pdfBtn = document.getElementById('downloadPdfBtn');
-if(pdfBtn) {
-    pdfBtn.addEventListener('click', () => {
-        const actionBar = document.getElementById('actionBar');
-        if(actionBar) actionBar.style.display = 'none';
-        html2pdf().set({ margin: 0.3, filename: 'Portfolio.pdf', html2canvas: { scale: 2 } }).from(document.getElementById('portfolioContent')).save().then(() => { if(actionBar) actionBar.style.display = 'block'; });
-    });
-}
+document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+    document.getElementById('actionBar').style.display = 'none';
+    html2pdf().set({ margin: 0.3, filename: 'Portfolio.pdf', html2canvas: { scale: 2 } }).from(document.getElementById('portfolioContent')).save().then(() => { document.getElementById('actionBar').style.display = 'block'; });
+});
 
 initializeRouting();
