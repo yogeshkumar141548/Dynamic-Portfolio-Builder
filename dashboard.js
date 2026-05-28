@@ -18,7 +18,6 @@ const db = getFirestore(app);
 let currentUid = null;
 let uploadedImageUrl = ""; 
 let cropperInstance = null; 
-
 let existingAvatarUrl = "https://via.placeholder.com/150";
 
 function generateLiveLink(slug) {
@@ -46,64 +45,73 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 });
 
 const form = document.getElementById('portfolioForm');
-form.addEventListener('input', () => {
-    document.getElementById('prevName').innerText = document.getElementById('fullName').value || "Professional Name";
-    document.getElementById('prevTitle').innerText = document.getElementById('jobTitle').value || "Headline Structure";
-    document.getElementById('prevBio').innerText = document.getElementById('bio').value || "Summary framework context output canvas.";
-});
+if (form) {
+    form.addEventListener('input', () => {
+        if(document.getElementById('prevName')) document.getElementById('prevName').innerText = document.getElementById('fullName').value || "Professional Name";
+        if(document.getElementById('prevTitle')) document.getElementById('prevTitle').innerText = document.getElementById('jobTitle').value || "Headline Structure";
+        if(document.getElementById('prevBio')) document.getElementById('prevBio').innerText = document.getElementById('bio').value || "Summary framework context output canvas.";
+    });
+}
 
 const avatarUploadInput = document.getElementById('avatarUpload');
 const cropperModalOverlay = document.getElementById('cropperModalOverlay');
 const cropperRawImageFrame = document.getElementById('cropperRawImageFrame');
 
-avatarUploadInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            cropperRawImageFrame.src = event.target.result;
-            cropperModalOverlay.style.display = 'flex'; 
+if (avatarUploadInput) {
+    avatarUploadInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                cropperRawImageFrame.src = event.target.result;
+                cropperModalOverlay.style.display = 'flex'; 
 
-            if (cropperInstance) {
-                cropperInstance.destroy();
-            }
+                if (cropperInstance) cropperInstance.destroy();
 
-            cropperInstance = new Cropper(cropperRawImageFrame, {
-                aspectRatio: 1,
-                viewMode: 1,
-                background: false,
-                autoCropArea: 1,
-                responsive: true
-            });
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-document.getElementById('btnExecuteCropOperation').addEventListener('click', () => {
-    if (cropperInstance) {
-        const canvas = cropperInstance.getClippedCanvas({ width: 300, height: 300 });
-        if (canvas) {
-            uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); 
-            document.getElementById('prevAvatar').src = uploadedImageUrl; 
+                cropperInstance = new Cropper(cropperRawImageFrame, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    background: false,
+                    autoCropArea: 1,
+                    responsive: true
+                });
+            };
+            reader.readAsDataURL(file);
         }
-        cropperInstance.destroy();
-        cropperInstance = null;
-        cropperModalOverlay.style.display = 'none';
-    }
-});
+    });
+}
 
-document.getElementById('btnCancelCropOperation').addEventListener('click', () => {
-    if (cropperInstance) {
-        cropperInstance.destroy();
-        cropperInstance = null;
-    }
-    cropperModalOverlay.style.display = 'none';
-    avatarUploadInput.value = ""; 
-});
+const cropBtn = document.getElementById('btnExecuteCropOperation');
+if (cropBtn) {
+    cropBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+            const canvas = cropperInstance.getClippedCanvas({ width: 300, height: 300 });
+            if (canvas) {
+                uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); 
+                if(document.getElementById('prevAvatar')) document.getElementById('prevAvatar').src = uploadedImageUrl; 
+            }
+            cropperInstance.destroy();
+            cropperInstance = null;
+            cropperModalOverlay.style.display = 'none';
+        }
+    });
+}
+
+const cancelCropBtn = document.getElementById('btnCancelCropOperation');
+if (cancelCropBtn) {
+    cancelCropBtn.addEventListener('click', () => {
+        if (cropperInstance) {
+            cropperInstance.destroy();
+            cropperInstance = null;
+        }
+        cropperModalOverlay.style.display = 'none';
+        avatarUploadInput.value = ""; 
+    });
+}
 
 function appendEducationNode(data = {}) {
     const parent = document.getElementById('educationContainer');
+    if (!parent) return;
     const div = document.createElement('div'); div.className = 'dynamic-item-row';
     div.innerHTML = `
         <div class="dynamic-fields-container">
@@ -121,6 +129,7 @@ function appendEducationNode(data = {}) {
 
 function appendExperienceNode(data = {}) {
     const parent = document.getElementById('experienceContainer');
+    if (!parent) return;
     const div = document.createElement('div'); div.className = 'dynamic-item-row';
     div.innerHTML = `
         <div class="dynamic-fields-container">
@@ -139,6 +148,7 @@ function appendExperienceNode(data = {}) {
 
 function appendProjectNode(data = {}) {
     const parent = document.getElementById('projectContainer');
+    if (!parent) return;
     const div = document.createElement('div'); div.className = 'dynamic-item-row';
     div.innerHTML = `
         <div class="dynamic-fields-container">
@@ -155,111 +165,115 @@ function appendProjectNode(data = {}) {
     parent.appendChild(div);
 }
 
-document.getElementById('addEducationBtn').addEventListener('click', () => appendEducationNode());
-document.getElementById('addExperienceBtn').addEventListener('click', () => appendExperienceNode());
-document.getElementById('addProjectBtn').addEventListener('click', () => appendProjectNode());
+if(document.getElementById('addEducationBtn')) document.getElementById('addEducationBtn').addEventListener('click', () => appendEducationNode());
+if(document.getElementById('addExperienceBtn')) document.getElementById('addExperienceBtn').addEventListener('click', () => appendExperienceNode());
+if(document.getElementById('addProjectBtn')) document.getElementById('addProjectBtn').addEventListener('click', () => appendProjectNode());
 
-form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const sBtn = document.getElementById('submitFormBtn');
-    sBtn.innerText = "Transmitting Configurations to Cloud Matrix..."; sBtn.disabled = true;
+if (form) {
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const sBtn = document.getElementById('submitFormBtn');
+        sBtn.innerText = "Transmitting Configurations to Cloud Matrix..."; sBtn.disabled = true;
 
-    let rawSlug = document.getElementById('profileSlug').value.trim().toLowerCase();
-    let slug = rawSlug.replace(/[^a-z0-9-_]/g, '-');
-    if(!slug) slug = "portfolio-user";
+        let rawSlug = document.getElementById('profileSlug').value.trim().toLowerCase();
+        let slug = rawSlug.replace(/[^a-z0-9-_]/g, '-');
+        if(!slug) slug = "portfolio-user";
 
-    const education = [];
-    document.querySelectorAll('#educationContainer .dynamic-item-row').forEach(row => {
-        const inst = row.querySelector('.edu-inst').value.trim();
-        if(inst) education.push({ institute: inst, degree: row.querySelector('.edu-deg').value.trim(), timeline: row.querySelector('.edu-time').value.trim() });
-    });
+        const education = [];
+        document.querySelectorAll('#educationContainer .dynamic-item-row').forEach(row => {
+            const inst = row.querySelector('.edu-inst').value.trim();
+            if(inst) education.push({ institute: inst, degree: row.querySelector('.edu-deg').value.trim(), timeline: row.querySelector('.edu-time').value.trim() });
+        });
 
-    const experiences = [];
-    document.querySelectorAll('#experienceContainer .dynamic-item-row').forEach(row => {
-        const comp = row.querySelector('.exp-comp').value.trim();
-        if(comp) experiences.push({ company: comp, role: row.querySelector('.exp-role').value.trim(), timeline: row.querySelector('.exp-time').value.trim(), description: row.querySelector('.exp-desc').value.trim() });
-    });
+        const experiences = [];
+        document.querySelectorAll('#experienceContainer .dynamic-item-row').forEach(row => {
+            const comp = row.querySelector('.exp-comp').value.trim();
+            if(comp) experiences.push({ company: comp, role: row.querySelector('.exp-role').value.trim(), timeline: row.querySelector('.exp-time').value.trim(), description: row.querySelector('.exp-desc').value.trim() });
+        });
 
-    const projects = [];
-    document.querySelectorAll('#projectContainer .dynamic-item-row').forEach(row => {
-        const title = row.querySelector('.proj-title').value.trim();
-        if(title) projects.push({ title: title, category: row.querySelector('.proj-cat').value.trim() || 'General', link: row.querySelector('.proj-link').value.trim(), description: row.querySelector('.proj-desc').value.trim() });
-    });
+        const projects = [];
+        document.querySelectorAll('#projectContainer .dynamic-item-row').forEach(row => {
+            const title = row.querySelector('.proj-title').value.trim();
+            if(title) projects.push({ title: title, category: row.querySelector('.proj-cat').value.trim() || 'General', link: row.querySelector('.proj-link').value.trim(), description: row.querySelector('.proj-desc').value.trim() });
+        });
 
-    const payload = {
-        isMaintenanceActive: document.getElementById('maintenanceToggle').checked,
-        theme: document.getElementById('themeSelect').value,
-        slug: slug,
-        avatar: uploadedImageUrl || existingAvatarUrl || "",
-        name: document.getElementById('fullName').value.trim(),
-        title: document.getElementById('jobTitle').value.trim(),
-        location: document.getElementById('locationStr').value.trim(),
-        bio: document.getElementById('bio').value.trim(),
-        email: document.getElementById('contactEmail').value.trim(),
-        phone: document.getElementById('contactPhone').value.trim(),
-        linkedin: document.getElementById('linkedinUrl').value.trim(),
-        github: document.getElementById('githubUrl').value.trim(),
-        twitter: document.getElementById('twitterUrl').value.trim(),
-        skills: document.getElementById('techSkills').value.trim(),
-        education,
-        experiences,
-        projects
-    };
+        const payload = {
+            isMaintenanceActive: document.getElementById('maintenanceToggle').checked,
+            theme: document.getElementById('themeSelect').value,
+            slug: slug,
+            avatar: uploadedImageUrl || existingAvatarUrl || "",
+            name: document.getElementById('fullName').value.trim(),
+            title: document.getElementById('jobTitle').value.trim(),
+            location: document.getElementById('locationStr').value.trim(),
+            bio: document.getElementById('bio').value.trim(),
+            email: document.getElementById('contactEmail').value.trim(),
+            phone: document.getElementById('contactPhone').value.trim(),
+            linkedin: document.getElementById('linkedinUrl').value.trim(),
+            github: document.getElementById('githubUrl').value.trim(),
+            twitter: document.getElementById('twitterUrl').value.trim(),
+            skills: document.getElementById('techSkills').value.trim(),
+            education,
+            experiences,
+            projects
+        };
 
-    try {
-        const slugCheck = await getDoc(doc(db, "slugs", slug));
-        if (slugCheck.exists() && slugCheck.data().ownerId !== currentUid) {
-            alert("This Custom Routing URL slug is already mapped to another profile matrix. Please pick an alternative slug identifier string.");
+        try {
+            const slugCheck = await getDoc(doc(db, "slugs", slug));
+            if (slugCheck.exists() && slugCheck.data().ownerId !== currentUid) {
+                alert("This Custom Routing URL slug is already mapped to another profile matrix.");
+                sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
+                return;
+            }
+
+            await setDoc(doc(db, "portfolios", currentUid), payload, { merge: true });
+            await setDoc(doc(db, "slugs", slug), { ownerId: currentUid });
+
+            const liveLink = generateLiveLink(slug);
+            const linkNode = document.getElementById('livePortfolioLink');
+            if (linkNode) { linkNode.href = liveLink; linkNode.style.display = 'block'; }
+
+            alert("Data Sync Successful. Cloud records operating in optimal integrity states.");
+        } catch(err) {
+            console.error("Transmission Error Cluster Detected:", err);
+            alert("Transaction Aborted: Cloud system deployment encountered sync constraints.");
+        } finally {
             sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
-            return;
         }
-
-        await setDoc(doc(db, "portfolios", currentUid), payload, { merge: true });
-        await setDoc(doc(db, "slugs", slug), { ownerId: currentUid });
-
-        const liveLink = generateLiveLink(slug);
-        const linkNode = document.getElementById('livePortfolioLink');
-        linkNode.href = liveLink; linkNode.style.display = 'block';
-
-        alert("Data Sync Successful. Cloud records operating in optimal integrity states.");
-    } catch(err) {
-        console.error("Transmission Error Cluster Detected:", err);
-        alert("Transaction Aborted: Cloud system deployment encountered sync constraints.");
-    } finaly {
-        sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
-    }
-});
+    });
+}
 
 async function fetchPortfolioData(uid) {
     try {
         const docSnap = await getDoc(doc(db, "portfolios", uid));
         if(docSnap.exists()) {
             const d = docSnap.data();
-            document.getElementById('maintenanceToggle').checked = d.isMaintenanceActive || false;
-            document.getElementById('themeSelect').value = d.theme || 'theme-light';
-            document.getElementById('profileSlug').value = d.slug || '';
+            if(document.getElementById('maintenanceToggle')) document.getElementById('maintenanceToggle').checked = d.isMaintenanceActive || false;
+            if(document.getElementById('themeSelect')) document.getElementById('themeSelect').value = d.theme || 'theme-light';
+            if(document.getElementById('profileSlug')) document.getElementById('profileSlug').value = d.slug || '';
             if(d.avatar) { 
                 uploadedImageUrl = d.avatar; 
                 existingAvatarUrl = d.avatar;
-                document.getElementById('prevAvatar').src = d.avatar; 
+                if(document.getElementById('prevAvatar')) document.getElementById('prevAvatar').src = d.avatar; 
             }
-            document.getElementById('fullName').value = d.name || '';
-            document.getElementById('jobTitle').value = d.title || '';
-            document.getElementById('locationStr').value = d.location || '';
-            document.getElementById('bio').value = d.bio || '';
-            document.getElementById('contactEmail').value = d.email || '';
-            document.getElementById('contactPhone').value = d.phone || '';
-            document.getElementById('linkedinUrl').value = d.linkedin || '';
-            document.getElementById('githubUrl').value = d.github || '';
-            document.getElementById('twitterUrl').value = d.twitter || '';
-            document.getElementById('techSkills').value = d.skills || '';
-            if(document.getElementById('prevViews')) {
-                document.getElementById('prevViews').innerText = d.views || 0;
-            }
+            if(document.getElementById('fullName')) document.getElementById('fullName').value = d.name || '';
+            if(document.getElementById('jobTitle')) document.getElementById('jobTitle').value = d.title || '';
+            if(document.getElementById('locationStr')) document.getElementById('locationStr').value = d.location || '';
+            if(document.getElementById('bio')) document.getElementById('bio').value = d.bio || '';
+            if(document.getElementById('contactEmail')) document.getElementById('contactEmail').value = d.email || '';
+            if(document.getElementById('contactPhone')) document.getElementById('contactPhone').value = d.phone || '';
+            if(document.getElementById('linkedinUrl')) document.getElementById('linkedinUrl').value = d.linkedin || '';
+            if(document.getElementById('githubUrl')) document.getElementById('githubUrl').value = d.github || '';
+            if(document.getElementById('twitterUrl')) document.getElementById('twitterUrl').value = d.twitter || '';
+            if(document.getElementById('techSkills')) document.getElementById('techSkills').value = d.skills || '';
+            if(document.getElementById('prevViews')) document.getElementById('prevViews').innerText = d.views || 0;
 
-            document.getElementById('educationContainer').innerHTML = '';
-            document.getElementById('experienceContainer').innerHTML = '';
-            document.getElementById('projectContainer').innerHTML = '';
+            const eduCont = document.getElementById('educationContainer');
+            const expCont = document.getElementById('experienceContainer');
+            const projCont = document.getElementById('projectContainer');
+
+            if(eduCont) eduCont.innerHTML = '';
+            if(expCont) expCont.innerHTML = '';
+            if(projCont) projCont.innerHTML = '';
 
             if(d.education) d.education.forEach(item => appendEducationNode(item));
             if(d.experiences) d.experiences.forEach(item => appendExperienceNode(item));
@@ -268,18 +282,19 @@ async function fetchPortfolioData(uid) {
             if (d.slug) {
                 const liveLink = generateLiveLink(d.slug);
                 const linkNode = document.getElementById('livePortfolioLink');
-                linkNode.href = liveLink; linkNode.style.display = 'block';
+                if (linkNode) { linkNode.href = liveLink; linkNode.style.display = 'block'; }
             }
 
-            form.dispatchEvent(new Event('input'));
+            if (form) form.dispatchEvent(new Event('input'));
         }
     } catch (err) { console.error("Data Fetch Error:", err); }
 }
 
 function streamRecruiterMessages(uid) {
+    const container = document.getElementById('messagesInboxContainer');
+    if (!container) return;
     const qBox = query(collection(db, "messages"), where("portfolioOwnerId", "==", uid), orderBy("timestamp", "desc"));
     onSnapshot(qBox, (snap) => {
-        const container = document.getElementById('messagesInboxContainer');
         container.innerHTML = '';
         if(snap.empty) { container.innerHTML = '<p class="placeholder-text">Inbound mailbox clean.</p>'; return; }
         snap.forEach(mDoc => {
