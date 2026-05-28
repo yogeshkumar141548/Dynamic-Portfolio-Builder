@@ -3,221 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Portfolio Builder - Dashboard</title>
-    <link rel="stylesheet" href="style-login.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+    <title>Portfolio Dashboard - Admin Panel</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    
     <style>
-        body { margin: 0; background-color: #f3f4f6; color: #1f2937; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border-bottom: 1px solid #1e293b; padding: 16px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; box-sizing: border-box; }
-        .brand-logo { display: flex; align-items: center; gap: 12px; }
-        .brand-logo h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .nav-actions { display: flex; align-items: center; gap: 20px; }
-        .user-badge { display: flex; align-items: center; gap: 8px; color: #94a3b8; font-size: 14px; font-weight: 500; }
-        .user-icon { width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; }
-        .btn-logout { background: transparent; border: 1px solid #334155; color: #94a3b8; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
-        .btn-logout:hover { background: #1e293b; color: #f8fafc; border-color: #475569; }
-        .dashboard-layout { display: flex; flex: 1; overflow: hidden; }
-        .form-panel { flex: 1; padding: 30px; overflow-y: auto; background: #ffffff; box-sizing: border-box; }
-        .preview-panel { width: 420px; background: #f8fafc; border-left: 1px solid #e2e8f0; padding: 30px; overflow-y: auto; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .form-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-        .form-section h3 { margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #0f172a; border-left: 4px solid #2563eb; padding-left: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px; }
-        .input-wrapper { display: flex; flex-direction: column; gap: 6px; }
-        .input-wrapper-full { display: flex; flex-direction: column; gap: 6px; grid-column: span 2; }
-        .input-wrapper label, .input-wrapper-full label { font-size: 12px; font-weight: 600; color: #475569; }
-        .form-panel input[type="text"], .form-panel input[type="email"], .form-panel input[type="tel"], .form-panel select, .form-panel textarea { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; transition: border-color 0.2s; background: #ffffff; }
-        .form-panel input:focus, .form-panel select:focus, .form-panel textarea:focus { outline: none; border-color: #2563eb; }
-        .form-panel textarea { height: 80px; resize: vertical; }
-        .dynamic-item-row { display: flex; gap: 12px; background: #ffffff; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; margin-bottom: 12px; align-items: flex-start; position: relative; }
-        .dynamic-fields-container { display: flex; flex-direction: column; flex: 1; gap: 10px; }
-        .btn-add-node { background: #e0f2fe; color: #0369a1; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-        .btn-add-node:hover { background: #bae6fd; }
-        .btn-remove-node { background: #fee2e2; color: #b91c1c; border: none; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .btn-remove-node:hover { background: #fecaca; }
-        .btn-primary { width: 100%; padding: 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.2); transition: background 0.2s; margin-bottom: 12px; }
-        .btn-primary:hover { background: #1d4ed8; }
-        .btn-view-live { display: block; width: 100%; text-align: center; padding: 12px; background: #0f172a; color: #f8fafc; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px; box-sizing: border-box; border: 1px solid #1e293b; transition: background 0.2s; }
-        .btn-view-live:hover { background: #1e293b; }
-        .preview-card-frame { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box; max-width: 360px; }
-        .inbox-section { width: 100%; max-width: 360px; margin-top: 30px; text-align: left; }
-        .inbox-section h4 { margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #334155; display: flex; align-items: center; gap: 6px; }
-        .messages-container { display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; }
-        .inbox-msg-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); position: relative; }
-        .msg-meta { font-size: 12px; color: #64748b; display: flex; flex-direction: column; gap: 2px; }
-        .btn-delete-msg { background: transparent; border: none; color: #ef4444; font-size: 11px; cursor: pointer; padding: 4px 0 0 0; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
-        .btn-delete-msg:hover { text-decoration: underline; }
-        .placeholder-text { font-size: 12px; color: #94a3b8; text-align: center; margin: 20px 0; font-style: italic; }
+        /* आपका मूल प्रीमियम डिज़ाइन और CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; color: #0f172a; 
+        }
+        .dashboard-container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        h2, h3, h4 { margin-top: 0; font-weight: 600; }
+        
+        /* इनपुट और ग्रिड लेआउट */
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        @media (max-width: 768px) { .input-grid { grid-template-columns: 1fr; } }
+        
+        input[type="text"], input[type="email"], input[type="url"], select, textarea { 
+            width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; background: #f8fafc; color: #0f172a; border-radius: 8px; box-sizing: border-box; font-size: 14px; 
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px #e0f2fe; }
+        textarea { height: 100px; resize: vertical; }
+        
+        /* बटन्स */
+        .btn-primary { background: #0ea5e9; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-success { background: #22c55e; color: white; border: none; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; }
+        .btn-remove-node { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; height: 45px; align-self: end; }
+        
+        /* डायनामिक रोज़ (Rows) का स्टाइल */
+        .dynamic-item-row { display: flex; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; align-items: center; }
+        .dynamic-fields-container { flex-grow: 1; }
+        
+        /* इनबॉक्स मैसेजेस */
+        .inbox-msg-card { background: #ffffff; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #0ea5e9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .msg-meta { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 5px; }
 
-        /* --- DYNAMIC CROPPER MODAL SYSTEM STYLES --- */
-        .crop-modal-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
-        .crop-card-box { background: #ffffff; padding: 24px; border-radius: 16px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; }
-        .crop-card-box h4 { margin: 0 0 16px 0; font-size: 18px; color: #0f172a; font-weight: 700; }
-        .crop-workspace-view { max-height: 320px; background: #f8fafc; overflow: hidden; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; }
-        .crop-workspace-view img { max-width: 100%; max-height: 320px; display: block; }
-        .crop-action-bar-btns { display: flex; gap: 12px; justify-content: flex-end; }
-        .btn-crop-cancel { background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; }
-        .btn-crop-cancel:hover { background: #e2e8f0; }
-        .btn-crop-apply { background: #2563eb; color: #ffffff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.2); }
-        .btn-crop-apply:hover { background: #1d4ed8; }
+        /* क्रॉपर विंडो (Modal Box) का स्टाइल */
+        #cropperModalOverlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999;
+        }
+        .cropper-popup-box { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; }
+        .image-frame-container { max-height: 380px; margin-bottom: 20px; background: #f1f5f9; overflow: hidden; border-radius: 8px; }
+        .image-frame-container img { max-width: 100%; display: block; }
+        .crop-btn-group { display: flex; justify-content: center; gap: 12px; }
+        .crop-btn-group button { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
+        #btnExecuteCropOperation { background: #0ea5e9; color: white; }
+        #btnCancelCropOperation { background: #64748b; color: white; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="brand-logo">
-            <h2>Dynamic Portfolio Builder</h2>
-        </div>
-        <div class="nav-actions">
-            <div class="user-badge">
-                <span class="user-icon"></span>
-                <span id="userEmailDisplay">Synchronizing Secure Session...</span>
+    <div class="dashboard-container">
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2>Portfolio Administration Panel</h2>
+                <p style="margin: 0; color: #64748b;">Active Matrix: <span id="userEmailDisplay" style="font-weight: 600; color: #0f172a;">Loading...</span></p>
             </div>
-            <button id="logoutBtn" class="btn-logout">Sign Out Session</button>
-        </div>
-    </nav>
-
-    <div class="dashboard-layout">
-        <div class="form-panel">
-            <form id="portfolioForm">
-                
-                <div class="form-section">
-                    <h3>Domain Router Configuration</h3>
-                    <div class="input-grid">
-                        <div class="input-wrapper">
-                            <label for="profileSlug">Custom Profile URL Slug</label>
-                            <input type="text" id="profileSlug" placeholder="e.g., yogesh-kumar">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="themeSelect">Active Portfolio Canvas Theme</label>
-                            <select id="themeSelect">
-                                <option value="theme-light">Premium Minimal Light</option>
-                                <option value="theme-dark">Midnight Aesthetic Dark</option>
-                                <option value="theme-cyberpunk">Neon Cyberpunk Variant</option>
-                            </select>
-                        </div>
-                        <div class="input-wrapper-full" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 5px;">
-                            <input type="checkbox" id="maintenanceToggle" style="width: auto; margin: 0;">
-                            <label for="maintenanceToggle" style="margin: 0; cursor: pointer; font-size: 13px; font-weight: 600; color: #1e293b;">Enable Maintenance Splash Layer (Blocks public traffic views)</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3>Executive Personal Information</h3>
-                    <div class="input-grid">
-                        <div class="input-wrapper">
-                            <label for="avatarUpload">Profile Headshot Avatar</label>
-                            <input type="file" id="avatarUpload" accept="image/*" style="font-size: 12px;">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="fullName">Full Professional Name</label>
-                            <input type="text" id="fullName" placeholder="Full Professional Name">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="jobTitle">Corporate Executive Headline</label>
-                            <input type="text" id="jobTitle" placeholder="e.g., Assistant Design Engineer">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="locationStr">Geographical Base</label>
-                            <input type="text" id="locationStr" placeholder="e.g., Ahmedabad, Gujarat">
-                        </div>
-                        <div class="input-wrapper-full">
-                            <label for="bio">Professional Executive Biography Summary</label>
-                            <textarea id="bio" placeholder="Write a short summary of your professional expertise..."></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3>Secure Communications channels</h3>
-                    <div class="input-grid">
-                        <div class="input-wrapper">
-                            <label for="contactEmail">Public Correspondence Email</label>
-                            <input type="email" id="contactEmail" placeholder="Public Email">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="contactPhone">Direct Contact Hotline</label>
-                            <input type="tel" id="contactPhone" placeholder="Hotline String">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="linkedinUrl">LinkedIn Profile Link</label>
-                            <input type="text" id="linkedinUrl" placeholder="https://linkedin.com/in/...">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="githubUrl">GitHub Repository Mapping Link</label>
-                            <input type="text" id="githubUrl" placeholder="https://github.com/...">
-                        </div>
-                        <div class="input-wrapper">
-                            <label for="twitterUrl">Twitter / X Pipeline Link</label>
-                            <input type="text" id="twitterUrl" placeholder="https://x.com/...">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3>Core Operational Skill Badges</h3>
-                    <div class="input-wrapper-full">
-                        <label for="techSkills">Technical Capabilities Vector (Comma Separated Strings)</label>
-                        <input type="text" id="techSkills" placeholder="e.g., SolidWorks, AutoCAD, HTML, CSS, JavaScript">
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3>Academic Education Milestones <button type="button" id="addEducationBtn" class="btn-add-node" style="float: right;">+ Append Milestone Record</button></h3>
-                    <div id="educationContainer"></div>
-                </div>
-
-                <div class="form-section">
-                    <h3>Professional Experience History <button type="button" id="addExperienceBtn" class="btn-add-node" style="float: right;">+ Append Experience Record</button></h3>
-                    <div id="experienceContainer"></div>
-                </div>
-
-                <div class="form-section">
-                    <h3>Technical Projects Matrices <button type="button" id="addProjectBtn" class="btn-add-node" style="float: right;">+ Append Engineering Project</button></h3>
-                    <div id="projectContainer"></div>
-                </div>
-
-                <button type="submit" id="submitFormBtn" class="btn-primary">Save & Publish Portfolio Data</button>
-                <a id="livePortfolioLink" href="#" target="_blank" class="btn-view-live" style="display:none;">👁️ View My Live Portfolio ↗</a>
-            </form>
+            <button id="logoutBtn" class="btn-primary" style="background: #ef4444;">Logout from Matrix</button>
         </div>
 
-        <div class="preview-panel">
-            <div class="preview-card-frame">
-                <img id="prevAvatar" src="https://via.placeholder.com/150" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:15px; border:3px solid #2563eb; display:inline-block;" alt="Avatar">
-                <h1 id="prevName" style="margin:0 0 5px 0; font-size:24px;"></h1>
-                <p id="prevTitle" style="color:#2563eb; font-weight:600; margin:0 0 15px 0; font-size:15px;"></p>
-                <p id="prevBio" style="font-size:14px; line-height:1.5; color:#4b5563; white-space: pre-wrap; text-align:left;"></p>
-                <hr style="border:0; border-top:1px solid #e5e7eb; margin:15px 0;">
-                <h4 style="margin:0 0 10px 0; font-size:14px; color:#64748b; text-align:left;">Telemetry Overview</h4>
-                <div style="display:flex; justify-content:space-between; font-size:13px; color:#4b5563;">
-                    <span>Profile Traffic Engine Counter:</span>
-                    <strong id="prevViews" style="color:#0f172a;">0</strong>
+        <div style="margin-bottom: 25px;">
+            <a id="livePortfolioLink" href="#" target="_blank" style="display:none; text-decoration: none; background: #e0f2fe; color: #0369a1; padding: 12px 20px; border-radius: 8px; font-weight: 600; text-align: center;">🚀 Your Live Portfolio Link is Active. Click to View.</a>
+        </div>
+
+        <form id="portfolioForm">
+            <div class="card">
+                <h3>System Controls & Telemetry</h3>
+                <div class="input-grid">
+                    <div>
+                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Template Theme Setup</label>
+                        <select id="themeSelect">
+                            <option value="theme-light">Premium Light</option>
+                            <option value="theme-dark">Minimal Dark</option>
+                            <option value="theme-cyberpunk">Neon Cyberpunk</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Custom Profile Routing Slug</label>
+                        <input type="text" id="profileSlug" placeholder="e.g., alex-developer" required>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; display: flex; gap: 30px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="maintenanceToggle" style="width: 18px; height: 18px;"> Activate Maintenance Mode Block
+                    </label>
+                    <span style="font-size: 14px; color: #64748b;">Total Tracked Profile Views: <strong id="prevViews" style="color: #0ea5e9;">0</strong></span>
                 </div>
             </div>
 
-            <div class="inbox-section">
-                <h4>📬 Inbound Telemetry Lead Mailbox</h4>
-                <div class="messages-container" id="messagesInboxContainer">
-                    <p class="placeholder-text">Establishing WebSocket listener pipeline...</p>
+            <div class="card">
+                <h3>Personal Profile Information</h3>
+                <div style="display: flex; gap: 25px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
+                    <img id="prevAvatar" src="https://via.placeholder.com/150" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border: 3px solid #0ea5e9;" alt="Avatar Frame">
+                    <div>
+                        <label style="font-weight: 500; display: block; margin-bottom: 6px;">Upload Profile Photo</label>
+                        <input type="file" id="avatarUpload" accept="image/*" style="font-size: 13px;">
+                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #64748b;">Cropper configuration window triggers instantly upon load.</p>
+                    </div>
+                </div>
+
+                <div class="input-grid">
+                    <div>
+                        <label>Full Identity Name</label>
+                        <input type="text" id="fullName" placeholder="Professional Name" required>
+                    </div>
+                    <div>
+                        <label>Headline Title</label>
+                        <input type="text" id="jobTitle" placeholder="Headline Structure" required>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Operational Location Address</label>
+                    <input type="text" id="locationStr" placeholder="e.g., San Francisco, CA">
+                </div>
+                <div>
+                    <label>Professional Summary Bio</label>
+                    <textarea id="bio" placeholder="Summary framework context output canvas..."></textarea>
                 </div>
             </div>
+
+            <div class="card">
+                <h3>Communications & Networks Matrix</h3>
+                <div class="input-grid">
+                    <input type="email" id="contactEmail" placeholder="Public Contact Email Link" required>
+                    <input type="text" id="contactPhone" placeholder="Operational Telephone String">
+                    <input type="url" id="linkedinUrl" placeholder="LinkedIn Gateway URL Mesh">
+                    <input type="url" id="githubUrl" placeholder="GitHub Repository Master Link">
+                    <input type="url" id="twitterUrl" placeholder="Twitter/X Networking Link">
+                </div>
+                <div style="margin-top: 10px;">
+                    <label style="display: block; margin-bottom: 6px; font-weight: 500;">Core Capabilities / Tech Skills (Comma Separated Values)</label>
+                    <input type="text" id="techSkills" placeholder="e.g., React, Node.js, Python, AWS, Docker, SolidWorks">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Education Milestones</h3>
+                <div id="educationContainer"></div>
+                <button type="button" id="addEducationBtn" class="btn-primary" style="background:#64748b;">+ Add Education Node</button>
+            </div>
+
+            <div class="card">
+                <h3>Professional Experience</h3>
+                <div id="experienceContainer"></div>
+                <button type="button" id="addExperienceBtn" class="btn-primary" style="background:#64748b;">+ Add Experience Node</button>
+            </div>
+
+            <div class="card">
+                <h3>Project Portfolio</h3>
+                <div id="projectContainer"></div>
+                <button type="button" id="addProjectBtn" class="btn-primary" style="background:#64748b;">+ Add Project Node</button>
+            </div>
+
+            <div style="margin-top: 30px; margin-bottom: 5px;">
+                <button type="submit" id="submitFormBtn" class="btn-success">Save & Publish Portfolio Data</button>
+            </div>
+        </form>
+
+        <div class="card" style="margin-top: 35px;">
+            <h3>Send a Message Inbox Logs</h3>
+            <div id="messagesInboxContainer"></div>
         </div>
     </div>
 
-    <div class="crop-modal-container" id="cropperModalOverlay">
-        <div class="crop-card-box">
-            <h4>Adjust Professional Image Framework</h4>
-            <div class="crop-workspace-view">
+    <div id="cropperModalOverlay">
+        <div class="cropper-popup-box">
+            <h4 style="margin-bottom: 15px;">Configure Avatar Parameters</h4>
+            <div class="image-frame-container">
                 <img id="cropperRawImageFrame" src="">
             </div>
-            <div class="crop-action-bar-btns">
-                <button type="button" class="btn-crop-cancel" id="btnCancelCropOperation">Cancel</button>
-                <button type="button" class="btn-crop-apply" id="btnExecuteCropOperation">Apply Crop Layout</button>
+            <div class="crop-btn-group">
+                <button type="button" id="btnExecuteCropOperation">Apply Crop Layout</button>
+                <button type="button" id="btnCancelCropOperation">Cancel</button>
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <script type="module" src="dashboard.js"></script>
 </body>
