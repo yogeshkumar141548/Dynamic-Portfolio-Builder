@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, addDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyArb86FC6-vIX9OQ7ir1adDEmtc27Ksq4k",
@@ -21,7 +21,7 @@ async function initPortfolioView() {
     const slug = urlParams.get('user');
 
     if (!slug) {
-        document.body.innerHTML = '<div class="placeholder-text">Error: No portfolio identifier specified in the route routing link.</div>';
+        document.body.innerHTML = '<div class="placeholder-text">Error: No portfolio identifier specified in the routing link.</div>';
         return;
     }
 
@@ -77,6 +77,7 @@ function renderPortfolioData(data) {
     setupSocialLink('linkGithub', data.github);
     setupSocialLink('linkTwitter', data.twitter);
 
+    // Education Matrix Rendering
     const eduContainer = document.getElementById('educationTimeline');
     eduContainer.innerHTML = '';
     if (data.education && data.education.length > 0) {
@@ -93,6 +94,7 @@ function renderPortfolioData(data) {
         eduContainer.innerHTML = '<p class="placeholder-text">No educational logs reported.</p>';
     }
 
+    // Core Capabilities Rendering
     const skillsContainer = document.getElementById('techSkillsContainer');
     skillsContainer.innerHTML = '';
     if (data.skills) {
@@ -103,8 +105,11 @@ function renderPortfolioData(data) {
                 skillsContainer.appendChild(span);
             }
         });
+    } else {
+        skillsContainer.innerHTML = '<p class="placeholder-text">No skillsets defined.</p>';
     }
 
+    // Experience Matrix Rendering
     const expContainer = document.getElementById('experienceTimeline');
     expContainer.innerHTML = '';
     if (data.experiences && data.experiences.length > 0) {
@@ -123,6 +128,7 @@ function renderPortfolioData(data) {
         expContainer.innerHTML = '<p class="placeholder-text">No operational milestones logged.</p>';
     }
 
+    // Projects Grid System Mapping
     allProjects = data.projects || [];
     renderProjects(allProjects);
     buildFilters(allProjects);
@@ -130,11 +136,12 @@ function renderPortfolioData(data) {
 
 function setupSocialLink(id, val) {
     const el = document.getElementById(id);
-    if (val) el.href = val; else el.style.display = 'none';
+    if (val) { el.href = val; el.style.display = 'inline-block'; } else { el.style.display = 'none'; }
 }
 
 function renderProjects(projects) {
     const grid = document.getElementById('projectsGrid');
+    if (!grid) return;
     grid.innerHTML = '';
     if (projects.length === 0) {
         grid.innerHTML = '<p class="placeholder-text" style="grid-column: 1/-1;">No projects match your filter configuration criteria.</p>';
@@ -144,7 +151,7 @@ function renderProjects(projects) {
         const div = document.createElement('div'); div.className = 'project-card';
         div.innerHTML = `
             <span class="category-tag">${p.category || 'General'}</span>
-            <h4 class="project-title">${p.title}</h4>
+            <h4 class="project-title" style="margin: 0 0 10px 0; font-size: 17px;">${p.title}</h4>
             <p class="project-desc">${p.description}</p>
             ${p.link ? `<a href="${p.link}" target="_blank" class="project-link">🔗 Track Deployment Pipeline</a>` : ''}
         `;
@@ -154,6 +161,7 @@ function renderProjects(projects) {
 
 function buildFilters(projects) {
     const container = document.getElementById('dynamicFilters');
+    if (!container) return;
     container.innerHTML = '';
     if (projects.length === 0) return;
 
@@ -162,7 +170,7 @@ function buildFilters(projects) {
         const btn = document.createElement('button');
         btn.className = `filter-btn ${cat === 'All' ? 'active' : ''}`;
         btn.innerText = cat;
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             if (cat === 'All') renderProjects(allProjects);
@@ -185,43 +193,46 @@ async function incrementViewCounter(uid) {
     } catch (e) { console.error("Telemetry failure: ", e); }
 }
 
-document.getElementById('contactForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const ack = document.getElementById('contactAck');
-    ack.innerText = "Transmitting secure packets to cloud framework...";
-    
-    const payload = {
-        portfolioOwnerId: targetOwnerId,
-        name: document.getElementById('senderName').value.trim(),
-        email: document.getElementById('senderEmail').value.trim(),
-        message: document.getElementById('senderMsg').value.trim(),
-        timestamp: new Date().toISOString()
-    };
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const ack = document.getElementById('contactAck');
+        ack.innerText = "Transmitting secure packets to cloud framework...";
+        
+        const payload = {
+            portfolioOwnerId: targetOwnerId,
+            name: document.getElementById('senderName').value.trim(),
+            email: document.getElementById('senderEmail').value.trim(),
+            message: document.getElementById('senderMsg').value.trim(),
+            timestamp: new Date().toISOString()
+        };
 
-    try {
-        await addDoc(collection(db, "messages"), payload);
-        ack.style.color = "green";
-        ack.innerText = "✓ Record synchronized. Mailbox route operating optimally.";
-        document.getElementById('contactForm').reset();
-    } catch(err) {
-        ack.style.color = "red";
-        ack.innerText = "Transmission loss. Cloud matrix denied packet entry.";
-    }
-});
+        try {
+            await addDoc(collection(db, "messages"), payload);
+            ack.style.color = "green";
+            ack.innerText = "✓ Record synchronized. Mailbox route operating optimally.";
+            contactForm.reset();
+        } catch(err) {
+            ack.style.color = "red";
+            ack.innerText = "Transmission loss. Cloud matrix denied packet entry.";
+        }
+    });
+}
 
-document.getElementById('downloadPdfBtn').addEventListener('click', () => {
-    const element = document.getElementById('portfolioContent');
-    const actionBar = document.getElementById('actionBar');
-    
-    const opt = {
-        margin:       [10, 10, 10, 10],
-        filename:     'Professional-CV.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    
-    html2pdf().set(opt).from(element).save();
-});
+const pdfBtn = document.getElementById('downloadPdfBtn');
+if (pdfBtn) {
+    pdfBtn.addEventListener('click', () => {
+        const element = document.getElementById('portfolioContent');
+        const opt = {
+            margin:       [10, 10, 10, 10],
+            filename:     'Professional-CV.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    });
+}
 
 window.addEventListener('DOMContentLoaded', initPortfolioView);
