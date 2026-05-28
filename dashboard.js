@@ -19,6 +19,23 @@ let currentUid = null;
 let uploadedImageUrl = ""; 
 let cropperInstance = null; 
 
+// Base64 Placeholder Tracker to avoid overwriting clean image loops
+let existingAvatarUrl = "https://via.placeholder.com/150";
+
+// GitHub URL Segment Dynamic Resolver Utility
+function generateLiveLink(slug) {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    
+    if (origin.includes("github.io")) {
+        // GitHub Pages repository base naming fix configuration path
+        return `${origin}/Dynamic-Portfolio-Builder/portfolio.html?user=${slug}`;
+    } else {
+        // Localhost development routing configuration standard paths
+        return `${origin}/portfolio.html?user=${slug}`;
+    }
+}
+
 onAuthStateChanged(auth, (user) => {
     if (user) {
         currentUid = user.uid;
@@ -71,7 +88,6 @@ avatarUploadInput.addEventListener('change', (e) => {
     }
 });
 
-// Apply Crop Layout Operation handler
 document.getElementById('btnExecuteCropOperation').addEventListener('click', () => {
     if (cropperInstance) {
         const canvas = cropperInstance.getClippedCanvas({
@@ -90,7 +106,6 @@ document.getElementById('btnExecuteCropOperation').addEventListener('click', () 
     }
 });
 
-// Cancel UI sequence handler
 document.getElementById('btnCancelCropOperation').addEventListener('click', () => {
     if (cropperInstance) {
         cropperInstance.destroy();
@@ -191,7 +206,7 @@ form.addEventListener('submit', async (e) => {
         isMaintenanceActive: document.getElementById('maintenanceToggle').checked,
         theme: document.getElementById('themeSelect').value,
         slug: slug,
-        avatar: uploadedImageUrl || document.getElementById('prevAvatar').src || "",
+        avatar: uploadedImageUrl || existingAvatarUrl || "",
         name: document.getElementById('fullName').value.trim(),
         title: document.getElementById('jobTitle').value.trim(),
         location: document.getElementById('locationStr').value.trim(),
@@ -218,7 +233,8 @@ form.addEventListener('submit', async (e) => {
         await setDoc(doc(db, "portfolios", currentUid), payload, { merge: true });
         await setDoc(doc(db, "slugs", slug), { ownerId: currentUid });
 
-        const liveLink = `${window.location.origin}/portfolio.html?user=${slug}`;
+        // Update link dynamic routing logic
+        const liveLink = generateLiveLink(slug);
         const linkNode = document.getElementById('livePortfolioLink');
         linkNode.href = liveLink; linkNode.style.display = 'block';
 
@@ -239,7 +255,11 @@ async function fetchPortfolioData(uid) {
             document.getElementById('maintenanceToggle').checked = d.isMaintenanceActive || false;
             document.getElementById('themeSelect').value = d.theme || 'theme-light';
             document.getElementById('profileSlug').value = d.slug || '';
-            if(d.avatar) { uploadedImageUrl = d.avatar; document.getElementById('prevAvatar').src = d.avatar; }
+            if(d.avatar) { 
+                uploadedImageUrl = d.avatar; 
+                existingAvatarUrl = d.avatar;
+                document.getElementById('prevAvatar').src = d.avatar; 
+            }
             document.getElementById('fullName').value = d.name || '';
             document.getElementById('jobTitle').value = d.title || '';
             document.getElementById('locationStr').value = d.location || '';
@@ -252,7 +272,6 @@ async function fetchPortfolioData(uid) {
             document.getElementById('techSkills').value = d.skills || '';
             document.getElementById('prevViews').innerText = d.views || 0;
 
-            // Clear containers to prevent duplicate appends on refresh loops
             document.getElementById('educationContainer').innerHTML = '';
             document.getElementById('experienceContainer').innerHTML = '';
             document.getElementById('projectContainer').innerHTML = '';
@@ -262,7 +281,7 @@ async function fetchPortfolioData(uid) {
             if(d.projects) d.projects.forEach(item => appendProjectNode(item));
 
             if (d.slug) {
-                const liveLink = `${window.location.origin}/portfolio.html?user=${d.slug}`;
+                const liveLink = generateLiveLink(d.slug);
                 const linkNode = document.getElementById('livePortfolioLink');
                 linkNode.href = liveLink; linkNode.style.display = 'block';
             }
@@ -292,4 +311,4 @@ function streamRecruiterMessages(uid) {
             container.appendChild(div);
         });
     });
-}
+        }
