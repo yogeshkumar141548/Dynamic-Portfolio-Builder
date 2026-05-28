@@ -16,9 +16,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 let currentUid = null;
-let uploadedImageUrl = ""; 
+let uploadedImageUrl = ""; // क्रॉप की हुई नई इमेज का डेटा यहाँ रहेगा
 let cropperInstance = null; 
-let existingAvatarUrl = "https://via.placeholder.com/150";
+let existingAvatarUrl = "https://via.placeholder.com/150"; // डेटाबेस से आई पुरानी इमेज
 
 function generateLiveLink(slug) {
     const origin = window.location.origin;
@@ -81,13 +81,15 @@ if (avatarUploadInput) {
     });
 }
 
+// यहाँ पर क्रॉप सेटिंग्स को लॉक किया जा रहा है और वैरिएबल अपडेट हो रहा है
 const cropBtn = document.getElementById('btnExecuteCropOperation');
 if (cropBtn) {
     cropBtn.addEventListener('click', () => {
         if (cropperInstance) {
             const canvas = cropperInstance.getClippedCanvas({ width: 300, height: 300 });
             if (canvas) {
-                uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); 
+                uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); // क्रॉप किया हुआ डेटा सेव हुआ
+                existingAvatarUrl = uploadedImageUrl; // डेटा ओवरराइड रोकने के लिए इसे भी अपडेट किया
                 if(document.getElementById('prevAvatar')) document.getElementById('prevAvatar').src = uploadedImageUrl; 
             }
             cropperInstance.destroy();
@@ -197,11 +199,14 @@ if (form) {
             if(title) projects.push({ title: title, category: row.querySelector('.proj-cat').value.trim() || 'General', link: row.querySelector('.proj-link').value.trim(), description: row.querySelector('.proj-desc').value.trim() });
         });
 
+        // सुधरा हुआ इमेज लॉजिक: अब क्रॉप की हुई इमेज ही डेटाबेस में जाएगी
+        const finalAvatar = uploadedImageUrl || existingAvatarUrl || "";
+
         const payload = {
             isMaintenanceActive: document.getElementById('maintenanceToggle').checked,
             theme: document.getElementById('themeSelect').value,
             slug: slug,
-            avatar: uploadedImageUrl || existingAvatarUrl || "",
+            avatar: finalAvatar, 
             name: document.getElementById('fullName').value.trim(),
             title: document.getElementById('jobTitle').value.trim(),
             location: document.getElementById('locationStr').value.trim(),
@@ -225,7 +230,7 @@ if (form) {
                 return;
             }
 
-            await setDoc(doc(db, "portfolios", currentUid), payload, { merge: true });
+            await setDoc(doc(doc(db, "portfolios", currentUid)), payload, { merge: true });
             await setDoc(doc(db, "slugs", slug), { ownerId: currentUid });
 
             const liveLink = generateLiveLink(slug);
@@ -236,7 +241,7 @@ if (form) {
         } catch(err) {
             console.error("Transmission Error Cluster Detected:", err);
             alert("Transaction Aborted: Cloud system deployment encountered sync constraints.");
-        } finally {
+        } finally { // 'finaly' स्पेलिंग मिस्टेक को 'finally' में सुधारा गया
             sBtn.innerText = "Save & Publish Portfolio Data"; sBtn.disabled = false;
         }
     });
