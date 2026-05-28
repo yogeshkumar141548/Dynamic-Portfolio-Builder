@@ -17,7 +17,7 @@ const db = getFirestore(app);
 
 let currentUid = null;
 let uploadedImageUrl = ""; 
-let cropperInstance = null; // Holds the active Cropper state loop
+let cropperInstance = null; 
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -42,7 +42,7 @@ form.addEventListener('input', () => {
     document.getElementById('prevBio').innerText = document.getElementById('bio').value || "Summary framework context output canvas.";
 });
 
-// --- UPDATED: ADVANCED IMAGE CROPPING SYSTEM ENGINE HANDLERS ---
+// --- ADVANCED IMAGE CROPPING SYSTEM ENGINE HANDLERS ---
 const avatarUploadInput = document.getElementById('avatarUpload');
 const cropperModalOverlay = document.getElementById('cropperModalOverlay');
 const cropperRawImageFrame = document.getElementById('cropperRawImageFrame');
@@ -53,14 +53,12 @@ avatarUploadInput.addEventListener('change', (e) => {
         const reader = new FileReader();
         reader.onload = (event) => {
             cropperRawImageFrame.src = event.target.result;
-            cropperModalOverlay.style.display = 'flex'; // Modal window display layer open
+            cropperModalOverlay.style.display = 'flex'; 
 
-            // Dynamic instance resolution to prevent multi-layer overlay leaks
             if (cropperInstance) {
                 cropperInstance.destroy();
             }
 
-            // Initialization parameter variables mapping profile dimensions criteria (1:1)
             cropperInstance = new Cropper(cropperRawImageFrame, {
                 aspectRatio: 1,
                 viewMode: 1,
@@ -76,18 +74,16 @@ avatarUploadInput.addEventListener('change', (e) => {
 // Apply Crop Layout Operation handler
 document.getElementById('btnExecuteCropOperation').addEventListener('click', () => {
     if (cropperInstance) {
-        // High-resolution canvas extraction for professional avatars
         const canvas = cropperInstance.getClippedCanvas({
             width: 300,
             height: 300
         });
 
         if (canvas) {
-            uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); // Dynamic compression state tracking optimization
-            document.getElementById('prevAvatar').src = uploadedImageUrl; // Local realtime workspace refresh
+            uploadedImageUrl = canvas.toDataURL('image/jpeg', 0.9); 
+            document.getElementById('prevAvatar').src = uploadedImageUrl; 
         }
         
-        // Clean and terminate current overlay process blocks
         cropperInstance.destroy();
         cropperInstance = null;
         cropperModalOverlay.style.display = 'none';
@@ -101,7 +97,7 @@ document.getElementById('btnCancelCropOperation').addEventListener('click', () =
         cropperInstance = null;
     }
     cropperModalOverlay.style.display = 'none';
-    avatarUploadInput.value = ""; // Clear parameters array values configuration states
+    avatarUploadInput.value = ""; 
 });
 
 
@@ -260,6 +256,13 @@ async function fetchPortfolioData(uid) {
             if(d.experiences) d.experiences.forEach(item => appendExperienceNode(item));
             if(d.projects) d.projects.forEach(item => appendProjectNode(item));
 
+            // Set the view link immediately on data fetch load
+            if (d.slug) {
+                const liveLink = `${window.location.origin}/portfolio.html?user=${d.slug}`;
+                const linkNode = document.getElementById('livePortfolioLink');
+                linkNode.href = liveLink; linkNode.style.display = 'block';
+            }
+
             form.dispatchEvent(new Event('input'));
         }
     } catch (err) { console.error("Data Fetch Error:", err); }
@@ -276,7 +279,7 @@ function streamRecruiterMessages(uid) {
             const div = document.createElement('div'); div.className = 'inbox-msg-card';
             div.innerHTML = `
                 <div class="msg-meta"><strong>${m.name}</strong><a href="mailto:${m.email}">${m.email}</a></div>
-                <p style=\"margin:8px 0; font-size:13px; color:#334155;\">${m.message}</p>
+                <p style="margin:8px 0; font-size:13px; color:#334155;">${m.message}</p>
                 <button class="btn-delete-msg" data-id="${mDoc.id}">🗑️ Purge Entry Record</button>
             `;
             div.querySelector('.btn-delete-msg').addEventListener('click', async (e) => {
@@ -286,3 +289,4 @@ function streamRecruiterMessages(uid) {
         });
     });
                                     }
+              
