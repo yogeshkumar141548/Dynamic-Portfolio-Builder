@@ -73,7 +73,7 @@ if (avatarUploadInput) {
     });
 }
 
-// अप्लाई क्रॉप बटन (LOCK & UPDATE VALUE)
+// APPLY CROP OPERATION BUTTON (LOCK & UPDATE CONFIGURATION VALUE)
 const cropBtn = document.getElementById('btnExecuteCropOperation');
 if (cropBtn) {
     cropBtn.addEventListener('click', () => {
@@ -167,6 +167,7 @@ if(document.getElementById('addExperienceBtn')) document.getElementById('addExpe
 if(document.getElementById('addProjectBtn')) document.getElementById('addProjectBtn').addEventListener('click', () => appendProjectNode());
 
 // --- DATABASE SUBMISSION & SYNC HUB ---
+const form = document.getElementById('portfolioForm');
 if (form) {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
