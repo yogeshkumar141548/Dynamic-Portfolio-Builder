@@ -3,172 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio Dashboard</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
-    
+    <title>Dynamic Portfolio Builder - Dashboard</title>
+    <link rel="stylesheet" href="style-login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #0f172a; }
-        .dashboard-container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
-        .card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
-        h2, h3, h4 { margin-top: 0; font-weight: 600; }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        @media (max-width: 768px) { .input-grid { grid-template-columns: 1fr; } }
-        input[type="text"], input[type="email"], input[type="url"], select, textarea { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; background: #f8fafc; color: #0f172a; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px #e0f2fe; }
-        textarea { height: 100px; resize: vertical; }
-        .btn-primary { background: #0ea5e9; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-        .btn-success { background: #22c55e; color: white; border: none; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; }
-        .btn-remove-node { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px; height: 45px; align-self: end; }
-        .dynamic-item-row { display: flex; gap: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 15px; align-items: center; }
-        .dynamic-fields-container { flex-grow: 1; }
-        .inbox-msg-card { background: #ffffff; padding: 15px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #0ea5e9; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .msg-meta { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 5px; }
+        body { margin: 0; background-color: #f3f4f6; color: #1f2937; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* --- RIGHT-ALIGNED NAVBAR STYLES --- */
+        .navbar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border-bottom: 1px solid #1e293b; padding: 16px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; box-sizing: border-box; }
+        .brand-logo { display: flex; align-items: center; gap: 12px; }
+        .brand-logo h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        .btn-logout { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.2s ease; }
+        .btn-logout:hover { background: #ef4444; color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); border-color: #ef4444; transform: translateY(-1px); }
 
-        /* CROPPER OVERLAY MODAL CONFIGURATIONS */
-        #cropperModalOverlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 9999;
-        }
-        .cropper-popup-box { background: white; padding: 25px; border-radius: 12px; max-width: 500px; width: 90%; text-align: center; }
-        .image-frame-container { max-height: 380px; margin-bottom: 20px; background: #f1f5f9; overflow: hidden; border-radius: 8px; }
-        .image-frame-container img { max-width: 100%; display: block; }
-        .crop-btn-group { display: flex; justify-content: center; gap: 12px; }
-        .crop-btn-group button { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; }
-        #btnExecuteCropOperation { background: #0ea5e9; color: white; }
-        #btnCancelCropOperation { background: #64748b; color: white; }
+        .analytics-strip { display: flex; gap: 20px; padding: 15px 30px; background: #e5e7eb; }
+        .stat-card { flex: 1; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .stat-icon { font-size: 24px; background: #f1f5f9; padding: 8px; border-radius: 50%; }
+        .stat-info h4 { margin: 0; font-size: 20px; color: #111827; }
+        .stat-info p { margin: 0; font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; padding: 20px; flex-grow: 1; overflow: hidden; }
+        .editor-panel, .preview-panel { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow-y: auto; display: flex; flex-direction: column; }
+        .preview-panel { background: #e5e7eb; }
+        .preview-card-frame { background: #fff; padding: 25px; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-grow: 1; overflow-y: auto; text-align: center; }
+        
+        input, textarea, select { width: 100%; padding: 10px; margin: 6px 0 14px 0; border: 1px solid #d1d5db; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        textarea { height: 80px; resize: vertical; }
+        
+        .maintenance-box { display: flex; align-items: center; background: #fef2f2; border: 1px dashed #ef4444; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        .switch-container { position: relative; display: inline-block; width: 40px; height: 20px; margin-right: 10px; }
+        .switch-container input { display: none; }
+        .slider-switch { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 20px; }
+        .slider-switch:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider-switch { background-color: #ef4444; }
+        input:checked + .slider-switch:before { transform: translateX(20px); }
+        .switch-label { font-size: 12px; font-weight: 600; color: #991b1b; }
+        
+        .entry-box { text-align: left; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 6px; position: relative; }
+        .badge-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; }
+        .badge { background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; }
+        .messages-panel-box { margin-top: 20px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px; max-height: 250px; overflow-y: auto; text-align: left; }
+        .inbox-msg-card { background: #ffffff; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 8px; border-radius: 6px; }
+        
+        .btn-primary { background: #2563eb; color: white; width: 100%; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 15px; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-view-live { display: none; background: #10b981; color: white; width: 100%; box-sizing: border-box; border: none; padding: 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; margin-top: 10px; text-align: center; text-decoration: none; transition: 0.3s; }
+        .btn-view-live:hover { background: #059669; }
+        .btn-secondary { background: #4b5563; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: 600; font-size: 12px; }
+        .btn-danger { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+        .btn-delete-msg { background: none; border: none; color: #ef4444; font-size: 11px; cursor: pointer; padding: 0; font-weight: 600; margin-top: 5px; display: block; }
+        
+        .msg-meta { font-size: 13px; color: #1e293b; display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px; }
+        .placeholder-text { font-size: 13px; color: #64748b; text-align: center; font-style: italic; margin-top: 10px; }
+        h3 { border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; margin-top: 25px; text-align: left; }
+        .mode-banner { display: none; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 12px; border-radius: 6px; font-size: 13px; font-weight: 500; margin-bottom: 15px; text-align: left; }
+        .image-upload-wrapper { display: flex; align-items: center; gap: 15px; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: left; }
+        .avatar-preview-box { width: 80px; height: 80px; border-radius: 50%; background: #e2e8f0; object-fit: cover; border: 2px solid #cbd5e1; }
+        .upload-status-lbl { font-size: 12px; font-weight: 600; color: #64748b; margin-top: 4px; display: block; }
+
+        /* --- STYLES FOR DYNAMIC FLOATING CROPPER HUD INTERFACE --- */
+        .crop-popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+        .crop-popup-box { background: #fff; border-radius: 12px; padding: 20px; width: 90%; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; }
+        .crop-popup-box h4 { margin: 0 0 15px 0; font-size: 16px; color: #0f172a; font-weight: 700; }
+        .crop-image-container-frame { max-height: 300px; background: #f1f5f9; overflow: hidden; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; }
+        .crop-image-container-frame img { max-width: 100%; max-height: 300px; display: block; }
+        .crop-buttons-row { display: flex; justify-content: flex-end; gap: 10px; }
     </style>
 </head>
 <body>
-
-    <div class="dashboard-container">
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-            <div>
-                <h2>Portfolio Administration Panel</h2>
-                <p style="margin: 0; color: #64748b;">Active Matrix: <span id="userEmailDisplay" style="font-weight: 600; color: #0f172a;">Loading...</span></p>
-            </div>
-            <button id="logoutBtn" class="btn-primary" style="background: #ef4444;">Logout from Matrix</button>
+    <div class="navbar">
+        <div class="brand-logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #38bdf8;">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+            <h2>Dynamic Portfolio Builder</h2>
         </div>
+        <button id="logoutBtn" class="btn-logout">Log Out</button>
+    </div>
 
-        <div style="margin-bottom: 25px;">
-            <a id="livePortfolioLink" href="#" target="_blank" style="display:none; text-decoration: none; background: #e0f2fe; color: #0369a1; padding: 12px 20px; border-radius: 8px; font-weight: 600; text-align: center;">🚀 Your Live Portfolio Link is Active. Click to View.</a>
-        </div>
+    <div class="analytics-strip">
+        <div class="stat-card"><span class="stat-icon">👁️</span><div class="stat-info"><h4 id="totalViews">0</h4><p>Total Hits</p></div></div>
+        <div class="stat-card"><span class="stat-icon">📈</span><div class="stat-info"><h4 id="lastActive">Never</h4><p>Last Activity Timestamp</p></div></div>
+    </div>
 
-        <form id="portfolioForm">
-            <div class="card">
-                <h3>System Controls & Telemetry</h3>
-                <div class="input-grid">
-                    <div>
-                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Template Theme Setup</label>
-                        <select id="themeSelect">
-                            <option value="theme-light">Premium Light</option>
-                            <option value="theme-dark">Minimal Dark</option>
-                            <option value="theme-cyberpunk">Neon Cyberpunk</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-weight: 500; display: block; margin-bottom: 8px;">Custom Profile Routing Slug</label>
-                        <input type="text" id="profileSlug" placeholder="e.g., alex-developer" required>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; display: flex; gap: 30px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" id="maintenanceToggle" style="width: 18px; height: 18px;"> Activate Maintenance Mode Block
+    <div class="dashboard-grid">
+        <div class="editor-panel">
+            <div id="systemModeBanner" class="mode-banner">📝 <strong>Edit Mode Active:</strong> Your existing portfolio configuration payload has loaded correctly. You may modify fields seamlessly and push your updates.</div>
+
+            <form id="portfolioForm">
+                <div class="maintenance-box">
+                    <label class="switch-container">
+                        <input type="checkbox" id="maintenanceToggle">
+                        <span class="slider-switch"></span>
                     </label>
-                    <span style="font-size: 14px; color: #64748b;">Total Tracked Profile Views: <strong id="prevViews" style="color: #0ea5e9;">0</strong></span>
+                    <span class="switch-label">🚧 Activate Maintenance Mode Isolation</span>
                 </div>
-            </div>
 
-            <div class="card">
-                <h3>Personal Profile Information</h3>
-                <div style="display: flex; gap: 25px; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
-                    <img id="prevAvatar" src="https://via.placeholder.com/150" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border: 3px solid #0ea5e9;" alt="Avatar Frame">
+                <h3>Routing & Theme</h3>
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Custom Profile URL Slug</label>
+                <input type="text" id="customSlug" placeholder="e.g., username" required>
+                
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Active Palette CSS Theme</label>
+                <select id="themeSelect">
+                    <option value="light">Minimal Light</option>
+                    <option value="dark">Midnight Dark</option>
+                    <option value="cyber">Cyberpunk Variant</option>
+                </select>
+
+                <h3>Profile Avatar Node</h3>
+                <div class="image-upload-wrapper">
+                    <img id="dashAvatarPreview" src="https://via.placeholder.com/150" class="avatar-preview-box" alt="Preview">
                     <div>
-                        <label style="font-weight: 500; display: block; margin-bottom: 6px;">Upload Profile Photo</label>
-                        <input type="file" id="avatarUpload" accept="image/*" style="font-size: 13px;">
-                        <p style="margin: 5px 0 0 0; font-size: 12px; color: #64748b;">Cropper configuration window triggers instantly upon load.</p>
+                        <label style="font-size:13px; font-weight:600; color:#475569; display:block; margin-bottom:5px;">Upload Profile Image</label>
+                        <input type="file" id="imageInput" accept="image/*" style="margin:0; padding:5px; font-size:12px;">
+                        <span id="uploadStatus" class="upload-status-lbl">No image file staged.</span>
                     </div>
                 </div>
 
-                <div class="input-grid">
-                    <div>
-                        <label>Full Identity Name</label>
-                        <input type="text" id="fullName" placeholder="Professional Name" required>
-                    </div>
-                    <div>
-                        <label>Headline Title</label>
-                        <input type="text" id="jobTitle" placeholder="Headline Structure" required>
-                    </div>
+                <h3>Profile Summary Nodes</h3>
+                <input type="text" id="fullName" placeholder="Full Name" required>
+                <input type="text" id="jobTitle" placeholder="Professional Headline" required>
+                <textarea id="bio" placeholder="Executive Summary Description" required></textarea>
+
+                <h3>Contact & Location Details</h3>
+                <input type="tel" id="phoneNumber" placeholder="Phone Number (e.g., +91 9876543210)">
+                <input type="email" id="publicEmail" placeholder="Public Contact Email (Optional)">
+                <input type="text" id="location" placeholder="City & Country (e.g., Ahmedabad, India)">
+
+                <h3>Social Handles Mapping</h3>
+                <input type="url" id="linkedinUrl" placeholder="LinkedIn Profile URL Links">
+                <input type="url" id="githubUrl" placeholder="GitHub Handle Profile URL Links">
+                <input type="url" id="twitterUrl" placeholder="Twitter/X Profile URL Links">
+
+                <h3>Skills Segmentation Arrays</h3>
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Technical Skills (Comma separated)</label>
+                <input type="text" id="techSkills" placeholder="e.g., HTML, CSS, JavaScript">
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Core Competencies (Comma separated)</label>
+                <input type="text" id="coreCompetencies" placeholder="e.g., Team Leadership, Agile">
+
+                <div id="educationContainer">
+                    <h3>Academic Education History</h3>
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <label>Operational Location Address</label>
-                    <input type="text" id="locationStr" placeholder="e.g., San Francisco, CA">
+                <button type="button" id="addEduBtn" class="btn-secondary">+ Append Academic History</button>
+
+                <div id="experienceContainer">
+                    <h3>Professional Experience Modules</h3>
                 </div>
-                <div>
-                    <label>Professional Summary Bio</label>
-                    <textarea id="bio" placeholder="Summary framework context output canvas..."></textarea>
+                <button type="button" id="addExpBtn" class="btn-secondary">+ Append New Experience</button>
+
+                <div id="certsContainer">
+                    <h3>Certifications & Technical Licenses</h3>
                 </div>
-            </div>
+                <button type="button" id="addCertBtn" class="btn-secondary">+ Append Qualification</button>
 
-            <div class="card">
-                <h3>Communications & Networks Matrix</h3>
-                <div class="input-grid">
-                    <input type="email" id="contactEmail" placeholder="Public Contact Email Link" required>
-                    <input type="text" id="contactPhone" placeholder="Operational Telephone String">
-                    <input type="url" id="linkedinUrl" placeholder="LinkedIn Gateway URL Mesh">
-                    <input type="url" id="githubUrl" placeholder="GitHub Repository Master Link">
-                    <input type="url" id="twitterUrl" placeholder="Twitter/X Networking Link">
+                <div id="projectsContainer">
+                    <h3>Interactive Showcase Projects</h3>
                 </div>
-                <div style="margin-top: 10px;">
-                    <label style="display: block; margin-bottom: 6px; font-weight: 500;">Core Capabilities / Tech Skills (Comma Separated Values)</label>
-                    <input type="text" id="techSkills" placeholder="e.g., React, Node.js, Python, AWS, Docker, SolidWorks">
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>Education Milestones</h3>
-                <div id="educationContainer"></div>
-                <button type="button" id="addEducationBtn" class="btn-primary" style="background:#64748b;">+ Add Education Node</button>
-            </div>
-
-            <div class="card">
-                <h3>Professional Experience</h3>
-                <div id="experienceContainer"></div>
-                <button type="button" id="addExperienceBtn" class="btn-primary" style="background:#64748b;">+ Add Experience Node</button>
-            </div>
-
-            <div class="card">
-                <h3>Project Portfolio</h3>
-                <div id="projectContainer"></div>
-                <button type="button" id="addProjectBtn" class="btn-primary" style="background:#64748b;">+ Add Project Node</button>
-            </div>
-
-            <div style="margin-top: 30px; margin-bottom: 5px;">
-                <button type="submit" id="submitFormBtn" class="btn-success">Save & Publish Portfolio Data</button>
-            </div>
-        </form>
-
-        <div class="card" style="margin-top: 35px;">
-            <h3>Send a Message Inbox Logs</h3>
-            <div id="messagesInboxContainer"></div>
+                <button type="button" id="addProjectBtn" class="btn-secondary">+ Append New Project</button>
+                
+                <button type="submit" id="submitFormBtn" class="btn-primary">Save & Publish Portfolio Data</button>
+                <a id="livePortfolioLink" href="#" target="_blank" class="btn-view-live">👁️ View My Live Portfolio ↗</a>
+            </form>
         </div>
-    </div>
 
-    <div id="cropperModalOverlay">
-        <div class="cropper-popup-box">
-            <h4 style="margin-bottom: 15px;">Configure Avatar Parameters</h4>
-            <div class="image-frame-container">
-                <img id="cropperRawImageFrame" src="">
+        <div class="preview-panel">
+            <div class="preview-card-frame">
+                <img id="prevAvatar" src="https://via.placeholder.com/150" style="width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:15px; border:3px solid #2563eb; display:inline-block;" alt="Avatar">
+                <h1 id="prevName" style="margin:0 0 5px 0; font-size:24px;"></h1>
+                <p id="prevTitle" style="color:#2563eb; font-weight:600; margin:0 0 15px 0; font-size:15px;"></p>
+                <p id="prevBio" style="font-size:14px; line-height:1.5; color:#4b5563; white-space: pre-wrap; text-align:left;"></p>
+                <hr style="border:0; border-top:1px solid #e5e7eb; margin:15px 0;">
+                <h4 style="margin:0 0 10px 0; font-size:14px; color:#111827;">Active Frame Badges:</h4>
+                <div id="prevSkills" class="badge-row"></div>
             </div>
-            <div class="crop-btn-group">
-                <button type="button" id="btnExecuteCropOperation">Apply Crop Layout</button>
-                <button type="button" id="btnCancelCropOperation">Cancel</button>
+
+            <div class="messages-panel-box">
+                <h3 style="margin:0 0 15px 0; font-size:16px;">📥 Inbound Lead Mailbox</h3>
+                <div id="messagesInboxContainer"></div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <div class="crop-popup-overlay" id="cropPopupOverlay">
+        <div class="crop-popup-box">
+            <h4>Crop & Align Profile Headshot Picture</h4>
+            <div class="crop-image-container-frame">
+                <img id="cropRawImageTarget" src="">
+            </div>
+            <div class="crop-buttons-row">
+                <button type="button" class="btn-danger" id="btnCancelCrop">Aborted</button>
+                <button type="button" class="btn-primary" id="btnExecuteCrop" style="width:auto; margin:0; padding:8px 16px;">Apply Circular Crop</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="dashboard.js"></script>
 </body>
 </html>
