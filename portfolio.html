@@ -6,40 +6,14 @@
     <title>Professional Portfolio</title>
     <link rel="stylesheet" href="style-portfolio.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        /* CSS Root Fallback Layers for Themes Integrity */
-        .theme-light {
-            --bg-color: #ffffff;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --accent: #2563eb;
-            --accent-alpha: rgba(37, 99, 235, 0.1);
-            --border-color: #e2e8f0;
-        }
-        .theme-dark {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --accent-alpha: rgba(56, 189, 248, 0.1);
-            --border-color: #334155;
-        }
-        .theme-cyberpunk {
-            --bg-color: #0f051d;
-            --card-bg: #140727;
-            --text-main: #00ffcc;
-            --text-muted: #ff007f;
-            --accent: #bc00dd;
-            --accent-alpha: rgba(188, 0, 221, 0.15);
-            --border-color: #bc00dd;
-        }
-    </style>
 </head>
-<body class="theme-light"> <div class="action-bar" id="actionBar">
+<body class="theme-light"> 
+    
+    <div class="action-bar" id="actionBar">
         <button id="downloadPdfBtn" class="btn-pdf">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 5px;"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4\"></path></svg>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 5px;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
             Download CV as PDF
         </button>
     </div>
@@ -60,13 +34,14 @@
             </div>
         </header>
 
-        <div class="portfolio-grid-layout" style="display: grid; grid-template-columns: 320px 1fr; gap: 30px; margin-top: 30px;">
+        <div class="portfolio-grid-layout">
             <aside class="sidebar-aside" style="display: flex; flex-direction: column; gap: 30px;">
+                
                 <div class="card identity-card-aside">
                     <h3>Contact Information</h3>
                     <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
-                        <div id="emailRow" style="font-size: 14px;">✉️ <a id="metaEmail" href="#" style="color: var(--text-main); text-decoration: none; font-weight: 500;"></a></div>
-                        <div id="phoneRow" style="font-size: 14px;">📞 <a id="metaPhone" href="#" style="color: var(--text-main); text-decoration: none; font-weight: 500;"></a></div>
+                        <div id="emailRow">✉️ <a id="metaEmail" href="#"></a></div>
+                        <div id="phoneRow">📞 <a id="metaPhone" href="#"></a></div>
                     </div>
                     <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
                     <h3>Professional Networks</h3>
@@ -105,14 +80,15 @@
                     <div id="experienceTimeline" class="timeline" style="display: flex; flex-direction: column; gap: 24px; margin-top: 15px;"></div>
                 </div>
 
-                <div class="card projects-card" style="margin-top: 30px;">
+                <div class="card projects-card">
                     <h3>Project Portfolio</h3>
-                    <div id="dynamicFilters" class="filter-container" style="display: flex; gap: 10px; margin-bottom: 20px;"></div>
-                    <div id="projectsGrid" class="projects-grid-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;"></div>
+                    <div id="dynamicFilters" class="filter-container"></div>
+                    <div id="projectsGrid" class="projects-grid-layout"></div>
                 </div>
             </main>
         </div>
     </div>
+    
     <script type="module" src="view.js"></script>
 </body>
 </html>
