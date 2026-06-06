@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, addDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, updateDoc, increment, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyArb86FC6-vIX9OQ7ir1adDEmtc27Ksq4k",
@@ -13,226 +13,216 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-let targetOwnerId = null;
-let allProjects = [];
+const urlParams = new URLSearchParams(window.location.search);
+const userIdParam = urlParams.get('id');
+const userSlugParam = urlParams.get('user');
+let targetUid = null;
 
-async function initPortfolioView() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const slug = urlParams.get('user');
-
-    if (!slug) {
-        document.body.innerHTML = '<div class="placeholder-text">Error: No portfolio identifier specified in the routing link.</div>';
-        return;
+async function initializeRouting() {
+    if (userSlugParam) {
+        const slugSnap = await getDoc(doc(db, "slugs", userSlugParam.trim().toLowerCase()));
+        if (slugSnap.exists()) targetUid = slugSnap.data().uid;
+    } else if (userIdParam) {
+        targetUid = userIdParam;
     }
 
+    if (targetUid) {
+        await updateDoc(doc(db, "portfolios", targetUid), { viewsCount: increment(1) }).catch(() => {});
+        fetchAndBuildPortfolio(targetUid);
+    } else {
+        renderErrorSplash("Portfolio routing parameter configuration is invalid or missing.");
+    }
+}
+
+async function fetchAndBuildPortfolio(uid) {
     try {
-        const slugSnap = await getDoc(doc(db, "slugs", slug));
-        if (!slugSnap.exists()) {
-            document.body.innerHTML = '<div class="placeholder-text">Error 404: Portfolio Profile Routing Link Matrix not found.</div>';
-            return;
-        }
-
-        targetOwnerId = slugSnap.data().ownerId;
-        const portfolioSnap = await getDoc(doc(db, "portfolios", targetOwnerId));
-
-        if (portfolioSnap.exists()) {
-            const data = portfolioSnap.data();
-            
+        const snapshot = await getDoc(doc(db, "portfolios", uid));
+        if (snapshot.exists()) {
+            const data = snapshot.data();
             if (data.isMaintenanceActive) {
-                document.body.innerHTML = '<div class="placeholder-text">🔒 Under Maintenance. This portfolio is temporarily offline for analytical optimization configurations.</div>';
+                document.body.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; background:#0f172a; color:#f8fafc; font-family:sans-serif; padding:20px;"><h2>🚧 Node Under Maintenance</h2><p style="color:#94a3b8;">The profile dashboard owner is running deployment script optimizations.</p></div>`;
                 return;
             }
-
-            renderPortfolioData(data);
-            incrementViewCounter(targetOwnerId);
-        }
-    } catch (err) {
-        console.error("Critical Execution Context Interrupted:", err);
-    }
+            buildDOM(data);
+            setupContactForm(uid);
+        } else { renderErrorSplash("Profile document data node unverified."); }
+    } catch (err) { console.error(err); renderErrorSplash("Handshake timeout across processing nodes."); }
 }
 
-function renderPortfolioData(data) {
-    document.body.className = data.theme || 'theme-light';
+function buildDOM(d) {
+    // 1. Dynamic Master Template Class Binding Engine
+    const currentTemplate = d.template || 'minimalist';
+    document.body.className = `theme-${d.theme || 'light'} render-${currentTemplate}`;
     
-    document.getElementById('ownerName').innerText = data.name || 'Professional Identity';
-    document.getElementById('ownerTitle').innerText = data.title || 'Designation Architecture';
-    document.getElementById('ownerLocation').innerText = data.location ? `📍 ${data.location}` : '';
-    document.getElementById('ownerBio').innerText = data.bio || '';
-    
-    if (data.avatar) {
-        document.getElementById('portfolioAvatar').src = data.avatar;
+    // Identity Synchronization
+    const avatarFrame = document.getElementById('viewAvatar');
+    if (d.avatar && d.avatar !== "https://via.placeholder.com/150" && d.avatar.trim() !== "") {
+        avatarFrame.src = d.avatar;
     } else {
-        document.querySelector('.hero-section').classList.add('has-no-image');
+        avatarFrame.src = "https://via.placeholder.com/150";
+        document.body.classList.add('has-no-image');
     }
 
-    const emailLink = document.getElementById('metaEmail');
-    if (data.email) { emailLink.innerText = data.email; emailLink.href = `mailto:${data.email}`; } 
-    else { document.getElementById('emailRow').style.display = 'none'; }
+    document.getElementById('viewName').innerText = d.name || 'Anonymous Portfolio';
+    document.getElementById('viewTitle').innerText = d.title || '';
+    document.getElementById('viewBio').innerText = d.bio || '';
 
-    const phoneLink = document.getElementById('metaPhone');
-    if (data.phone) { phoneLink.innerText = data.phone; phoneLink.href = `tel:${data.phone}`; } 
-    else { document.getElementById('phoneRow').style.display = 'none'; }
-
-    setupSocialLink('linkLinkedin', data.linkedin);
-    setupSocialLink('linkGithub', data.github);
-    setupSocialLink('linkTwitter', data.twitter);
-
-    // Education Matrix Rendering
-    const eduContainer = document.getElementById('educationTimeline');
-    eduContainer.innerHTML = '';
-    if (data.education && data.education.length > 0) {
-        data.education.forEach(item => {
-            const div = document.createElement('div'); div.className = 'list-item';
-            div.innerHTML = `
-                <div class="list-title">${item.degree}</div>
-                <div class="list-subtitle">${item.institute}</div>
-                <div class="list-meta">${item.timeline}</div>
-            `;
-            eduContainer.appendChild(div);
-        });
-    } else {
-        eduContainer.innerHTML = '<p class="placeholder-text">No educational logs reported.</p>';
+    // Contact Details Engine Block Sync
+    const contactInfoCard = document.getElementById('contactInfoCard');
+    const contactDetailsBlock = document.getElementById('contactDetailsBlock');
+    if (contactDetailsBlock) {
+        contactDetailsBlock.innerHTML = '';
+        let hasContact = false;
+        if (d.email) { contactDetailsBlock.innerHTML += `<div class="contact-item"><i class="contact-icon">✉️</i> <a href="mailto:${d.email}">${d.email}</a></div>`; hasContact = true; }
+        if (d.phone) { contactDetailsBlock.innerHTML += `<div class="contact-item"><i class="contact-icon">📞</i> <a href="tel:${d.phone}">${d.phone}</a></div>`; hasContact = true; }
+        if (d.location) { contactDetailsBlock.innerHTML += `<div class="contact-item"><i class="contact-icon">📍</i> <span>${d.location}</span></div>`; hasContact = true; }
+        if(contactInfoCard) contactInfoCard.style.display = hasContact ? 'block' : 'none';
     }
 
-    // Core Capabilities Rendering
-    const skillsContainer = document.getElementById('techSkillsContainer');
-    skillsContainer.innerHTML = '';
-    if (data.skills) {
-        data.skills.split(',').forEach(skill => {
-            if (skill.trim()) {
-                const span = document.createElement('span'); span.className = 'badge-pill';
-                span.innerText = skill.trim();
-                skillsContainer.appendChild(span);
-            }
-        });
-    } else {
-        skillsContainer.innerHTML = '<p class="placeholder-text">No skillsets defined.</p>';
+    // Social Links Render Deck
+    const socialDeck = document.getElementById('viewSocialDeck');
+    if (socialDeck) {
+        socialDeck.innerHTML = '';
+        if(d.linkedin) socialDeck.innerHTML += `<a href="${d.linkedin}" target="_blank" class="social-pill">LinkedIn</a>`;
+        if(d.github) socialDeck.innerHTML += `<a href="${d.github}" target="_blank" class="social-pill">GitHub</a>`;
+        if(d.twitter) socialDeck.innerHTML += `<a href="${d.twitter}" target="_blank" class="social-pill">Twitter/X</a>`;
     }
 
-    // Experience Matrix Rendering
-    const expContainer = document.getElementById('experienceTimeline');
-    expContainer.innerHTML = '';
-    if (data.experiences && data.experiences.length > 0) {
-        data.experiences.forEach(item => {
-            const div = document.createElement('div'); div.className = 'timeline-item';
-            div.innerHTML = `
-                <div class="timeline-dot"></div>
-                <span class="timeline-duration">${item.timeline}</span>
-                <div class="timeline-role">${item.role}</div>
-                <div class="timeline-company">${item.company}</div>
-                <p class="timeline-desc">${item.description}</p>
-            `;
-            expContainer.appendChild(div);
-        });
-    } else {
-        expContainer.innerHTML = '<p class="placeholder-text">No operational milestones logged.</p>';
+    // Template 3 Specific: Render Progress Bar Skill Metrics
+    const skillsMatrixCard = document.getElementById('skillsMatrixCard');
+    const skillsMatrixRenderBlock = document.getElementById('skillsMatrixRenderBlock');
+    if(skillsMatrixRenderBlock) {
+        skillsMatrixRenderBlock.innerHTML = '';
+        if(currentTemplate === 'matrix' && d.skillsMatrix && d.skillsMatrix.length > 0) {
+            skillsMatrixCard.style.display = 'block';
+            d.skillsMatrix.forEach(sm => {
+                skillsMatrixRenderBlock.innerHTML += `
+                    <div class="matrix-skill-row">
+                        <div class="matrix-skill-meta"><span>${sm.name}</span><span>${sm.percentage}%</span></div>
+                        <div class="progress-bar-track"><div class="progress-bar-fill" style="width: ${sm.percentage}%"></div></div>
+                    </div>`;
+            });
+        } else { skillsMatrixCard.style.display = 'none'; }
     }
 
-    // Projects Grid System Mapping
-    allProjects = data.projects || [];
-    renderProjects(allProjects);
-    buildFilters(allProjects);
-}
+    // Standard Array Compilers
+    mapStringBadges(d.skills, 'techSkillsContainer', 'techSkillsCard');
+    mapArrayBadges(d.coreCompetencies, 'coreCompetenciesContainer', 'coreCompCard');
 
-function setupSocialLink(id, val) {
-    const el = document.getElementById(id);
-    if (val) { el.href = val; el.style.display = 'inline-block'; } else { el.style.display = 'none'; }
-}
+    // Education Compiler
+    const eduBlock = document.getElementById('educationViewBlock');
+    const eduCardView = document.getElementById('eduCardView');
+    if (eduBlock && eduCardView) {
+        eduBlock.innerHTML = '';
+        if (d.education && d.education.length > 0) {
+            eduCardView.style.display = 'block';
+            d.education.forEach(edu => {
+                eduBlock.innerHTML += `<div class="list-item"><div class="list-title">${edu.degree}</div><div class="list-subtitle">${edu.school}</div><div class="list-meta">${edu.duration}</div></div>`;
+            });
+        } else { eduCardView.style.display = 'none'; }
+    }
 
-function renderProjects(projects) {
+    // Certifications Compiler
+    const certBlock = document.getElementById('certificationsViewBlock');
+    const certCardView = document.getElementById('certCardView');
+    if (certBlock && certCardView) {
+        certBlock.innerHTML = '';
+        if (d.certifications && d.certifications.length > 0) {
+            certCardView.style.display = 'block';
+            d.certifications.forEach(c => {
+                certBlock.innerHTML += `<div class="list-item"><div class="list-title">${c.title}</div><div class="list-subtitle">Issued by: ${c.issuer}</div></div>`;
+            });
+        } else { certCardView.style.display = 'none'; }
+    }
+
+    // Experience Timeline Compiler
+    const timeline = document.getElementById('experienceTimeline');
+    if (timeline) {
+        timeline.innerHTML = '';
+        if (d.experiences && d.experiences.length > 0) {
+            d.experiences.forEach(j => {
+                const div = document.createElement('div'); div.className = 'timeline-item';
+                div.innerHTML = `<div class="timeline-dot"></div><div class="timeline-duration">${j.duration}</div><h4 class="timeline-role">${j.role}</h4><h5 class="timeline-company">${j.company}</h5><p class="timeline-desc" style="white-space:pre-wrap;">${j.desc || ''}</p>`;
+                timeline.appendChild(div);
+            });
+        } else { document.getElementById('expCardWrapper').style.display = 'none'; }
+    }
+
+    // Projects Engine Grid Compiler
     const grid = document.getElementById('projectsGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    if (projects.length === 0) {
-        grid.innerHTML = '<p class="placeholder-text" style="grid-column: 1/-1;">No projects match your filter configuration criteria.</p>';
-        return;
-    }
-    projects.forEach(p => {
-        const div = document.createElement('div'); div.className = 'project-card';
-        div.innerHTML = `
-            <span class="category-tag">${p.category || 'General'}</span>
-            <h4 class="project-title" style="margin: 0 0 10px 0; font-size: 17px;">${p.title}</h4>
-            <p class="project-desc">${p.description}</p>
-            ${p.link ? `<a href="${p.link}" target="_blank" class="project-link">🔗 Track Deployment Pipeline</a>` : ''}
-        `;
-        grid.appendChild(div);
-    });
-}
-
-function buildFilters(projects) {
-    const container = document.getElementById('dynamicFilters');
-    if (!container) return;
-    container.innerHTML = '';
-    if (projects.length === 0) return;
-
-    const categories = ['All', ...new Set(projects.map(p => p.category || 'General'))];
-    categories.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = `filter-btn ${cat === 'All' ? 'active' : ''}`;
-        btn.innerText = cat;
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if (cat === 'All') renderProjects(allProjects);
-            else renderProjects(allProjects.filter(p => (p.category || 'General') === cat));
-        });
-        container.appendChild(btn);
-    });
-}
-
-async function incrementViewCounter(uid) {
-    const docRef = doc(db, "portfolios", uid);
-    try {
-        await runTransaction(db, async (transaction) => {
-            const sfDoc = await transaction.get(docRef);
-            if (sfDoc.exists()) {
-                const newViews = (sfDoc.data().views || 0) + 1;
-                transaction.update(docRef, { views: newViews });
+    const filterContainer = document.getElementById('dynamicFilters');
+    if (grid) {
+        grid.innerHTML = ''; if(filterContainer) filterContainer.innerHTML = '';
+        if (d.projects && d.projects.length > 0) {
+            const uniqueCats = [...new Set(d.projects.map(p => (p.category || 'Other').toLowerCase().trim()))];
+            if (filterContainer) {
+                filterContainer.innerHTML = `<button class="filter-btn active" data-filter="all">All Modules</button>`;
+                uniqueCats.forEach(cat => { filterContainer.innerHTML += `<button class="filter-btn" data-filter="${cat}">${cat}</button>`; });
             }
+            d.projects.forEach(p => {
+                const catValue = (p.category || 'Other').toLowerCase().trim();
+                const card = document.createElement('div'); card.className = 'project-card filter-item';
+                card.setAttribute('data-cat', catValue);
+                card.innerHTML = `<span class="category-tag">${p.category}</span><h4 class="project-title">${p.title}</h4><p class="project-desc" style="white-space:pre-wrap;">${p.desc || ''}</p>${p.link ? `<a href="${p.link}" target="_blank" class="project-link">Explore Variant Execution ↗</a>` : ''}`;
+                grid.appendChild(card);
+            });
+            setupFilters();
+        } else { document.getElementById('projCardWrapper').style.display = 'none'; }
+    }
+}
+
+function mapStringBadges(str, id, cardId) {
+    const c = document.getElementById(id); const card = document.getElementById(cardId);
+    if(c) {
+        c.innerHTML = '';
+        if(str && str.trim().length > 0) {
+            if(card) card.style.display = 'block';
+            str.split(',').forEach(item => { if(item.trim()) { const s = document.createElement('span'); s.className = 'badge-pill'; s.innerText = item.trim(); c.appendChild(s); } });
+        } else { if(card) card.style.display = 'none'; }
+    }
+}
+
+function mapArrayBadges(arr, id, cardId) {
+    const c = document.getElementById(id); const card = document.getElementById(cardId);
+    if(c) {
+        c.innerHTML = '';
+        if(arr && arr.length && arr.some(item => item.trim().length > 0)) {
+            if(card) card.style.display = 'block';
+            arr.forEach(item => { if(item.trim()) { const s = document.createElement('span'); s.className = 'badge-pill'; s.innerText = item.trim(); c.appendChild(s); } });
+        } else { if(card) card.style.display = 'none'; }
+    }
+}
+
+function setupFilters() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            document.querySelector('.filter-btn.active').classList.remove('active'); e.target.classList.add('active');
+            const cat = e.target.getAttribute('data-filter');
+            document.querySelectorAll('.filter-item').forEach(item => { item.style.display = (cat === 'all' || item.getAttribute('data-cat') === cat) ? 'flex' : 'none'; });
         });
-    } catch (e) { console.error("Telemetry failure: ", e); }
-}
-
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const ack = document.getElementById('contactAck');
-        ack.innerText = "Transmitting secure packets to cloud framework...";
-        
-        const payload = {
-            portfolioOwnerId: targetOwnerId,
-            name: document.getElementById('senderName').value.trim(),
-            email: document.getElementById('senderEmail').value.trim(),
-            message: document.getElementById('senderMsg').value.trim(),
-            timestamp: new Date().toISOString()
-        };
-
-        try {
-            await addDoc(collection(db, "messages"), payload);
-            ack.style.color = "green";
-            ack.innerText = "✓ Record synchronized. Mailbox route operating optimally.";
-            contactForm.reset();
-        } catch(err) {
-            ack.style.color = "red";
-            ack.innerText = "Transmission loss. Cloud matrix denied packet entry.";
-        }
     });
 }
 
-const pdfBtn = document.getElementById('downloadPdfBtn');
-if (pdfBtn) {
-    pdfBtn.addEventListener('click', () => {
-        const element = document.getElementById('portfolioContent');
-        const opt = {
-            margin:       [10, 10, 10, 10],
-            filename:     'Professional-CV.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().set(opt).from(element).save();
-    });
+function setupContactForm(ownerUid) {
+    const formElement = document.getElementById('contactForm');
+    if(formElement) {
+        formElement.addEventListener('submit', async (e) => {
+            e.preventDefault(); const ack = document.getElementById('contactAck'); ack.innerText = "Transmitting metrics encapsulation...";
+            try {
+                await addDoc(collection(db, "messages"), { portfolioOwnerId: ownerUid, name: document.getElementById('senderName').value, email: document.getElementById('senderEmail').value, message: document.getElementById('senderMsg').value, timestamp: serverTimestamp() });
+                ack.style.color = '#10b981'; ack.innerText = "Transmission successful!"; e.target.reset();
+            } catch(err) { ack.style.color = '#dc2626'; ack.innerText = "Transmission failed."; }
+        });
+    }
 }
 
-window.addEventListener('DOMContentLoaded', initPortfolioView);
+function renderErrorSplash(msg) {
+    document.body.innerHTML = `<div style="display:flex; justify-content:center; align-items:center; height:100vh; background:#f8fafc; font-family:sans-serif;"><div style="background:white; border:1px solid #e2e8f0; padding:40px; border-radius:12px; max-width:500px; text-align:center;"><h2>Interface Controller Blocked</h2><p>${msg}</p></div></div>`;
+}
+
+document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+    document.getElementById('actionBar').style.display = 'none';
+    html2pdf().set({ margin: 0.3, filename: 'Portfolio.pdf', html2canvas: { scale: 2 } }).from(document.getElementById('portfolioContent')).save().then(() => { document.getElementById('actionBar').style.display = 'flex'; });
+});
+
+initializeRouting();
