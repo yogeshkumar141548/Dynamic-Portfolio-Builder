@@ -3,92 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Portfolio</title>
+    <title>Professional Identity Portfolio</title>
     <link rel="stylesheet" href="style-portfolio.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* Multi-Template Subsystem Core Variables mapping */
+        .theme-light { --bg-color: #f8fafc; --card-bg: #ffffff; --text-main: #0f172a; --text-muted: #475569; --accent: #2563eb; --accent-alpha: rgba(37, 99, 235, 0.1); --border-color: #e2e8f0; }
+        .theme-dark { --bg-color: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8; --accent: #38bdf8; --accent-alpha: rgba(56, 189, 248, 0.1); --border-color: #334155; }
+        .theme-cyber { --bg-color: #020617; --card-bg: #0f172a; --text-main: #00ffcc; --text-muted: #38bdf8; --accent: #f43f5e; --accent-alpha: rgba(244, 63, 94, 0.15); --border-color: #881337; }
+        
+        /* Master Template Layout Overrides dynamic controllers */
+        body.render-timeline .portfolio-grid { grid-template-columns: 1fr; }
+        body.render-timeline .sidebar-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%; }
+        
+        body.render-grid .hero-section { background: linear-gradient(135deg, var(--card-bg) 0%, var(--accent-alpha) 100%); text-align: center; }
+        body.render-grid .hero-content { flex-direction: column; }
+        body.render-grid .projects-grid-layout { grid-template-columns: 1fr; }
+        
+        .progress-bar-track { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 20px; height: 12px; width: 100%; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { background: var(--accent); height: 100%; border-radius: 20px; transition: width 1s ease-in-out; }
+        .matrix-skill-row { margin-bottom: 15px; }
+        .matrix-skill-meta { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; }
+    </style>
 </head>
-<body class="theme-light"> 
-    
+<body class="theme-light">
     <div class="action-bar" id="actionBar">
-        <button id="downloadPdfBtn" class="btn-pdf">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle; margin-right: 5px;">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-            Download CV as PDF
-        </button>
+        <button id="downloadPdfBtn" class="btn-pdf">Download CV as PDF</button>
     </div>
 
     <div class="portfolio-container" id="portfolioContent">
-        
         <header class="hero-section">
             <div class="hero-content">
                 <div class="hero-avatar-wrapper">
-                    <img id="portfolioAvatar" src="https://via.placeholder.com/150" class="portfolio-avatar-frame" alt="Professional Headshot">
+                    <img id="viewAvatar" src="https://via.placeholder.com/150" class="portfolio-avatar-frame" alt="Identity Avatar">
                 </div>
-                <div style="flex-grow: 1;">
-                    <h1 id="ownerName" style="margin: 0 0 8px 0; font-size: 36px; font-weight: 700;"></h1>
-                    <p id="ownerTitle" style="font-size: 18px; font-weight: 600; color: var(--accent); margin: 0 0 12px 0;"></p>
-                    <p id="ownerLocation" style="font-size: 14px; color: var(--text-muted); margin: 0 0 16px 0; font-weight: 500;"></p>
-                    <p id="ownerBio" style="margin: 0; font-size: 15px; line-height: 1.7; color: var(--text-main); white-space: pre-wrap;"></p>
+                <div class="hero-text-wrapper">
+                    <h1 id="viewName">Loading Identity Cluster...</h1>
+                    <h2 id="viewTitle"></h2>
+                    <p id="viewBio"></p>
+                    <div id="viewSocialDeck" class="social-link-wrapper"></div>
                 </div>
             </div>
         </header>
 
-        <div class="portfolio-grid-layout">
-            <aside class="sidebar-aside" style="display: flex; flex-direction: column; gap: 30px;">
+        <div class="portfolio-grid">
+            <aside class="sidebar-info">
+                <div class="card" id="contactInfoCard" style="display: none;">
+                    <h3>Contact Details</h3>
+                    <div id="contactDetailsBlock" class="contact-block"></div>
+                </div>
+
+                <div class="card" id="skillsMatrixCard" style="display: none;">
+                    <h3>Metrics Capability Bars</h3>
+                    <div id="skillsMatrixRenderBlock"></div>
+                </div>
+
+                <div class="card" id="eduCardView" style="display: none;">
+                    <h3>Education</h3>
+                    <div id="educationViewBlock"></div>
+                </div>
+
+                <div class="card" id="certCardView" style="display: none;">
+                    <h3>Certifications</h3>
+                    <div id="certificationsViewBlock"></div>
+                </div>
+
+                <div class="card" id="coreCompCard" style="display: none;">
+                    <h3>Core Competencies</h3>
+                    <div id="coreCompetenciesContainer" class="badge-group"></div>
+                </div>
                 
-                <div class="card identity-card-aside">
-                    <h3>Contact Information</h3>
-                    <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 15px;">
-                        <div id="emailRow">✉️ <a id="metaEmail" href="#"></a></div>
-                        <div id="phoneRow">📞 <a id="metaPhone" href="#"></a></div>
-                    </div>
-                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
-                    <h3>Professional Networks</h3>
-                    <div style="display: flex; gap: 14px; margin-top: 15px; font-size: 14px;">
-                        <a id="linkLinkedin" href="#" target="_blank" style="color: var(--accent); font-weight: 600; text-decoration: none;">LinkedIn</a>
-                        <a id="linkGithub" href="#" target="_blank" style="color: var(--accent); font-weight: 600; text-decoration: none;">GitHub</a>
-                        <a id="linkTwitter" href="#" target="_blank" style="color: var(--accent); font-weight: 600; text-decoration: none;">Twitter/X</a>
-                    </div>
-                </div>
-
-                <div class="card education-card-aside">
-                    <h3>Education Milestones</h3>
-                    <div id="educationTimeline" style="display: flex; flex-direction: column; gap: 16px; margin-top: 15px;"></div>
-                </div>
-
-                <div class="card skills-card-aside">
-                    <h3>Core Capabilities</h3>
-                    <div id="techSkillsContainer" class="badge-group" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px;"></div>
+                <div class="card" id="techSkillsCard" style="display: none;">
+                    <h3>Technical Skills</h3>
+                    <div id="techSkillsContainer" class="badge-group"></div>
                 </div>
 
                 <div class="card contact-form-card">
-                    <h3>Send a Message</h3>
+                    <h3>Send an Enquiry Message</h3>
                     <form id="contactForm">
                         <input type="text" id="senderName" class="input-form" placeholder="Full Name" required>
                         <input type="email" id="senderEmail" class="input-form" placeholder="Email Address" required>
-                        <textarea id="senderMsg" class="input-form msg-area" placeholder="How can I help you?" required></textarea>
-                        <button type="submit" class="submit-msg-btn">Send Message</button>
+                        <textarea id="senderMsg" class="input-form msg-area" placeholder="Write message summary here..." required></textarea>
+                        <button type="submit" class="submit-msg-btn">Send Secure Encryption Message</button>
                     </form>
                     <div id="contactAck" class="contact-acknowledgement"></div>
                 </div>
             </aside>
 
             <main class="main-timeline">
-                <div class="card experience-card">
+                <div class="card experience-card" id="expCardWrapper">
                     <h3>Professional Experience</h3>
-                    <div id="experienceTimeline" class="timeline" style="display: flex; flex-direction: column; gap: 24px; margin-top: 15px;"></div>
+                    <div id="experienceTimeline" class="timeline"></div>
                 </div>
 
-                <div class="card projects-card">
-                    <h3>Project Portfolio</h3>
+                <div class="card projects-card" id="projCardWrapper">
+                    <h3>Project Portfolio Matrix</h3>
                     <div id="dynamicFilters" class="filter-container"></div>
                     <div id="projectsGrid" class="projects-grid-layout"></div>
                 </div>
             </main>
         </div>
     </div>
-    
     <script type="module" src="view.js"></script>
 </body>
 </html>
