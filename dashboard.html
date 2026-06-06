@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Portfolio Builder - Dashboard</title>
+    <title>Dynamic Portfolio Builder - Dashboard Workspace</title>
     <link rel="stylesheet" href="style-login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
     <style>
-        body { margin: 0; background-color: #f3f4f6; color: #1f2937; display: flex; flex-direction: column; height: 100vh; }
-        
-        /* --- RIGHT-ALIGNED NAVBAR STYLES --- */
+        body { margin: 0; background-color: #f3f4f6; color: #1f2937; display: flex; flex-direction: column; height: 100vh; font-family: 'Inter', sans-serif; }
         .navbar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; border-bottom: 1px solid #1e293b; padding: 16px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; box-sizing: border-box; }
         .brand-logo { display: flex; align-items: center; gap: 12px; }
         .brand-logo h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -43,7 +41,7 @@
         
         .entry-box { text-align: left; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; margin-bottom: 10px; border-radius: 6px; position: relative; }
         .badge-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; }
-        .badge { background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; }
+        .badge { background: #2563eb; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; }
         .messages-panel-box { margin-top: 20px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px; max-height: 250px; overflow-y: auto; text-align: left; }
         .inbox-msg-card { background: #ffffff; border: 1px solid #e2e8f0; padding: 12px; margin-bottom: 8px; border-radius: 6px; }
         
@@ -53,23 +51,25 @@
         .btn-view-live:hover { background: #059669; }
         .btn-secondary { background: #4b5563; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: 600; font-size: 12px; }
         .btn-danger { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; }
-        .btn-delete-msg { background: none; border: none; color: #ef4444; font-size: 11px; cursor: pointer; padding: 0; font-weight: 600; margin-top: 5px; display: block; }
         
         .msg-meta { font-size: 13px; color: #1e293b; display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px; }
         .placeholder-text { font-size: 13px; color: #64748b; text-align: center; font-style: italic; margin-top: 10px; }
-        h3 { border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; margin-top: 25px; text-align: left; }
+        h3 { border-bottom: 1px solid #e5e7eb; padding-bottom: 5px; margin-top: 25px; text-align: left; color: #0f172a; font-weight: 700; }
         .mode-banner { display: none; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 12px; border-radius: 6px; font-size: 13px; font-weight: 500; margin-bottom: 15px; text-align: left; }
         .image-upload-wrapper { display: flex; align-items: center; gap: 15px; background: #f8fafc; border: 1px dashed #cbd5e1; padding: 15px; border-radius: 6px; margin-bottom: 15px; text-align: left; }
         .avatar-preview-box { width: 80px; height: 80px; border-radius: 50%; background: #e2e8f0; object-fit: cover; border: 2px solid #cbd5e1; }
         .upload-status-lbl { font-size: 12px; font-weight: 600; color: #64748b; margin-top: 4px; display: block; }
 
-        /* --- STYLES FOR DYNAMIC FLOATING CROPPER HUD INTERFACE --- */
+        /* --- THEME INTERFACE POPUP MODAL STYLES --- */
         .crop-popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.85); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .crop-popup-box { background: #fff; border-radius: 12px; padding: 20px; width: 90%; max-width: 480px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; }
         .crop-popup-box h4 { margin: 0 0 15px 0; font-size: 16px; color: #0f172a; font-weight: 700; }
         .crop-image-container-frame { max-height: 300px; background: #f1f5f9; overflow: hidden; border-radius: 6px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; }
         .crop-image-container-frame img { max-width: 100%; max-height: 300px; display: block; }
         .crop-buttons-row { display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* Template Conditional Fields Indicator CSS */
+        .template-conditional-section { transition: all 0.3s ease; }
     </style>
 </head>
 <body>
@@ -90,7 +90,7 @@
 
     <div class="dashboard-grid">
         <div class="editor-panel">
-            <div id="systemModeBanner" class="mode-banner">📝 <strong>Edit Mode Active:</strong> Your existing portfolio configuration payload has loaded correctly. You may modify fields seamlessly and push your updates.</div>
+            <div id="systemModeBanner" class="mode-banner">📝 <strong>Edit Mode Active:</strong> Data layout configurations are parsing perfectly. Modify details and publish changes.</div>
 
             <form id="portfolioForm">
                 <div class="maintenance-box">
@@ -101,16 +101,25 @@
                     <span class="switch-label">🚧 Activate Maintenance Mode Isolation</span>
                 </div>
 
-                <h3>Routing & Theme</h3>
-                <label style="font-size:12px; font-weight:600; color:#4b5563;">Custom Profile URL Slug</label>
-                <input type="text" id="customSlug" placeholder="e.g., username" required>
-                
-                <label style="font-size:12px; font-weight:600; color:#4b5563;">Active Palette CSS Theme</label>
-                <select id="themeSelect">
-                    <option value="light">Minimal Light</option>
-                    <option value="dark">Midnight Dark</option>
-                    <option value="cyber">Cyberpunk Variant</option>
+                <h3>Layout Master Engine Selection</h3>
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Select Master Engine Template</label>
+                <select id="templateEngineSelect">
+                    <option value="minimalist">Template 1: Modern Minimalist Suite (Classic Layout)</option>
+                    <option value="timeline">Template 2: Timeline Executive Pro (Infographic Path)</option>
+                    <option value="matrix">Template 3: Skill Matrix Professional (Metrics Progress Bars)</option>
+                    <option value="grid">Template 4: Creative Visual Grid Variant (Bade Banner Framework)</option>
                 </select>
+
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Active Canvas Variant Theme</label>
+                <select id="themeSelect">
+                    <option value="light">Premium Light Accent</option>
+                    <option value="dark">Midnight Dark Accent</option>
+                    <option value="cyber">Cyberpunk Accent</option>
+                </select>
+
+                <h3>Routing Subsystem Configuration</h3>
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Custom Identity Profile URL Slug</label>
+                <input type="text" id="customSlug" placeholder="e.g., yogesh-kumar" required>
 
                 <h3>Profile Avatar Node</h3>
                 <div class="image-upload-wrapper">
@@ -124,24 +133,31 @@
 
                 <h3>Profile Summary Nodes</h3>
                 <input type="text" id="fullName" placeholder="Full Name" required>
-                <input type="text" id="jobTitle" placeholder="Professional Headline" required>
+                <input type="text" id="jobTitle" placeholder="Professional Headline (e.g., Mechanical Engineer @ PRAKASH PUMPS)" required>
                 <textarea id="bio" placeholder="Executive Summary Description" required></textarea>
 
                 <h3>Contact & Location Details</h3>
-                <input type="tel" id="phoneNumber" placeholder="Phone Number (e.g., +91 9876543210)">
-                <input type="email" id="publicEmail" placeholder="Public Contact Email (Optional)">
-                <input type="text" id="location" placeholder="City & Country (e.g., Ahmedabad, India)">
+                <input type="tel" id="phoneNumber" placeholder="Phone Number (e.g., +91 7617614345)">
+                <input type="email" id="publicEmail" placeholder="Public Contact Email (e.g., ykrajput713@gmail.com)">
+                <input type="text" id="location" placeholder="City & Country (e.g., Etah, India)">
 
                 <h3>Social Handles Mapping</h3>
-                <input type="url" id="linkedinUrl" placeholder="LinkedIn Profile URL Links">
-                <input type="url" id="githubUrl" placeholder="GitHub Handle Profile URL Links">
-                <input type="url" id="twitterUrl" placeholder="Twitter/X Profile URL Links">
+                <input type="url" id="linkedinUrl" placeholder="LinkedIn Profile URL">
+                <input type="url" id="githubUrl" placeholder="GitHub Profile URL">
+                <input type="url" id="twitterUrl" placeholder="Twitter/X Profile URL">
+
+                <div id="matrixSectionFields" class="template-conditional-section">
+                    <h3>Skill Progress Metrics (For Template 3: Skill Matrix)</h3>
+                    <div id="skillsMatrixContainer"></div>
+                    <button type="button" id="addMatrixSkillBtn" class="btn-secondary">+ Add Skill Progress Metric Bar</button>
+                </div>
 
                 <h3>Skills Segmentation Arrays</h3>
-                <label style="font-size:12px; font-weight:600; color:#4b5563;">Technical Skills (Comma separated)</label>
-                <input type="text" id="techSkills" placeholder="e.g., HTML, CSS, JavaScript">
-                <label style="font-size:12px; font-weight:600; color:#4b5563;">Core Competencies (Comma separated)</label>
-                <input type="text" id="coreCompetencies" placeholder="e.g., Team Leadership, Agile">
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Technical Skills (Comma separated labels)</label>
+                <input type="text" id="techSkills" placeholder="e.g., SolidWorks, AutoCAD, HTML, CSS, JavaScript">
+                
+                <label style="font-size:12px; font-weight:600; color:#4b5563;">Core Competencies (Comma separated labels)</label>
+                <input type="text" id="coreCompetencies" placeholder="e.g., CAD Design, Prototyping, Team Leadership">
 
                 <div id="educationContainer">
                     <h3>Academic Education History</h3>
@@ -193,7 +209,7 @@
                 <img id="cropRawImageTarget" src="">
             </div>
             <div class="crop-buttons-row">
-                <button type="button" class="btn-danger" id="btnCancelCrop">Aborted</button>
+                <button type="button" class="btn-danger" id="btnCancelCrop">Cancel</button>
                 <button type="button" class="btn-primary" id="btnExecuteCrop" style="width:auto; margin:0; padding:8px 16px;">Apply Circular Crop</button>
             </div>
         </div>
