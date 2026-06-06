@@ -261,13 +261,413 @@ function renderCompiledTemplate(data) {
             <div class="showcase-area" style="background:#ffffff; color:#111827; padding:35px; border-radius:25px 25px 0 0; flex-grow:1; display:grid; grid-template-columns:1fr 1fr; gap:25px;">
                 <div><h3 style="color:#065f46; border-left:4px solid #34d399; padding-left:10px; margin-bottom:15px; font-size:15px; text-transform:uppercase;">Abstract Target Brief</h3><p style="font-size:12.5px; color:#374151; line-height:1.5; margin-bottom:15px;">${about}</p><h3 style="color:#065f46; border-left:4px solid #34d399; padding-left:10px; margin-bottom:15px; font-size:15px; text-transform:uppercase;">Work History Logging</h3>${expHTML}</div>
                 <div><h3 style="color:#065f46; border-left:4px solid #34d399; padding-left:10px; margin-bottom:15px; font-size:15px; text-transform:uppercase;">Core Framework distribution</h3>${skillsHTML}<h3 style="color:#065f46; border-left:4px solid #34d399; padding-left:10px; margin-bottom:15px; font-size:15px; text-transform:uppercase; margin-top:20px;">Showcase Cards System</h3><div class="project-card-grid">${projectsHTML}</div></div>
-            </div>`;
+             </div>`;
+             
         canvas.style.padding = "0";
         canvas.style.display = "flex";
         canvas.style.flexDirection = "column";
         canvas.style.background = "#064e3b";
         canvas.querySelectorAll('.bar-fill').forEach(el => el.style.background = "#059669");
     }
+
+    else if (themeClass === 't10') {
+
+canvas.innerHTML = `
+
+<div style="
+display:flex;
+height:100%;
+min-height:900px;
+background:white;
+">
+
+<div style="
+width:220px;
+background:#163b70;
+color:white;
+padding:30px;
+display:flex;
+flex-direction:column;
+align-items:center;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid white;
+margin-bottom:25px;
+">
+
+<h2 style="
+writing-mode:vertical-rl;
+font-size:28px;
+letter-spacing:4px;
+margin-top:40px;
+">
+RESUME
+</h2>
+
+</div>
+
+<div style="
+flex:1;
+padding:40px;
+color:#333;
+">
+
+<h1 style="
+font-size:42px;
+margin:0;
+color:#163b70;
+">
+${name}
+</h1>
+
+<h3 style="
+margin-top:5px;
+color:#666;
+font-weight:500;
+">
+${role}
+</h3>
+
+<hr>
+
+<h3>ABOUT ME</h3>
+<p>${about}</p>
+
+<h3>SKILLS</h3>
+${skillsHTML}
+
+<h3>EXPERIENCE</h3>
+${expHTML}
+
+<h3>PROJECTS</h3>
+${projectsHTML}
+
+<h3>CONTACT</h3>
+
+<p>📧 ${email}</p>
+<p>📞 ${phone}</p>
+<p>📍 ${location}</p>
+
+</div>
+
+</div>
+`;
+
+canvas.style.padding = "0";
+canvas.style.background = "#ffffff";
+
+canvas.querySelectorAll('.bar-fill')
+.forEach(el=>{
+el.style.background="#163b70";
+});
+
+}
+else if (themeClass === 't11') {
+
+canvas.innerHTML = `
+
+<div style="
+display:flex;
+min-height:900px;
+background:white;
+">
+
+<div style="
+width:280px;
+background:#8b5cf6;
+color:white;
+padding:35px;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:140px;
+height:140px;
+border-radius:50%;
+object-fit:cover;
+border:5px solid white;
+display:block;
+margin:auto;
+">
+
+<h2 style="
+text-align:center;
+margin-top:20px;
+margin-bottom:5px;
+">
+${name}
+</h2>
+
+<p style="
+text-align:center;
+opacity:0.9;
+">
+${role}
+</p>
+
+<hr>
+
+<h3>CONTACT</h3>
+
+<p>📧 ${email}</p>
+<p>📞 ${phone}</p>
+<p>📍 ${location}</p>
+
+<hr>
+
+<h3>SKILLS</h3>
+
+${skillsHTML}
+
+</div>
+
+<div style="
+flex:1;
+padding:40px;
+color:#333;
+">
+
+<h2 style="color:#8b5cf6;">
+ABOUT ME
+</h2>
+
+<p>${about}</p>
+
+<h2 style="
+color:#8b5cf6;
+margin-top:30px;
+">
+EXPERIENCE
+</h2>
+
+${expHTML}
+
+<h2 style="
+color:#8b5cf6;
+margin-top:30px;
+">
+PROJECTS
+</h2>
+
+${projectsHTML}
+
+</div>
+
+</div>
+
+`;
+
+canvas.style.padding = "0";
+
+canvas.querySelectorAll('.bar-fill')
+.forEach(el=>{
+el.style.background="#8b5cf6";
+});
+
+}else if (themeClass === 't12') {
+
+canvas.innerHTML = `
+
+<div style="background:white;min-height:900px;">
+
+<div style="
+background:#0ea5e9;
+padding:30px;
+color:white;
+display:flex;
+align-items:center;
+gap:20px;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid white;
+">
+
+<div>
+<h1>${name}</h1>
+<h3>${role}</h3>
+</div>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:30px;
+padding:30px;
+">
+
+<div>
+
+<h3>EDUCATION</h3>
+
+${projectsHTML}
+
+<h3 style="margin-top:30px;">
+SKILLS
+</h3>
+
+${skillsHTML}
+
+</div>
+
+<div>
+
+<h3>EXPERIENCE</h3>
+
+${expHTML}
+
+<h3 style="margin-top:30px;">
+ABOUT
+</h3>
+
+<p>${about}</p>
+
+</div>
+
+</div>
+
+<div style="
+padding:20px 30px;
+border-top:1px solid #ddd;
+">
+
+📧 ${email}
+📞 ${phone}
+📍 ${location}
+
+</div>
+
+</div>
+
+`;
+
+canvas.style.padding = "0";
+
+canvas.querySelectorAll('.bar-fill')
+.forEach(el=>{
+el.style.background="#0ea5e9";
+});
+
+}
+
+else if (themeClass === 'T13') {
+
+canvas.innerHTML = `
+
+<div style="
+background:white;
+padding:40px;
+min-height:100vh;
+">
+
+<div style="
+text-align:center;
+margin-bottom:40px;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:140px;
+height:140px;
+border-radius:50%;
+object-fit:cover;
+border:6px solid #38bdf8;
+">
+
+<h1>${name}</h1>
+
+<h3 style="color:#38bdf8;">
+${role}
+</h3>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:40px;
+">
+
+<div>
+
+<h2 style="color:#38bdf8;">
+🎓 Education
+</h2>
+
+${projectsHTML}
+
+<h2 style="
+margin-top:30px;
+color:#38bdf8;
+">
+⭐ Skills
+</h2>
+
+${skillsHTML}
+
+</div>
+
+<div>
+
+<h2 style="color:#38bdf8;">
+💼 Experience
+</h2>
+
+${expHTML}
+
+<h2 style="
+margin-top:30px;
+color:#38bdf8;
+">
+👤 About
+</h2>
+
+<p>${about}</p>
+
+</div>
+
+</div>
+
+<div style="
+margin-top:40px;
+padding-top:20px;
+border-top:2px solid #e2e8f0;
+display:flex;
+justify-content:space-between;
+">
+
+<span>📧 ${email}</span>
+
+<span>📞 ${phone}</span>
+
+<span>📍 ${location}</span>
+
+</div>
+
+</div>
+
+`;
+
+canvas.style.padding = "0";
+
+canvas.querySelectorAll('.bar-fill')
+.forEach(el=>{
+el.style.background="#38bdf8";
+});
+
+}
 
     // Attach PDF compilation listener independently
     const pdfBtn = document.getElementById('downloadPdfBtn');
