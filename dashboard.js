@@ -17,6 +17,7 @@ const db = getFirestore(app);
 
 let currentUid = null;
 let uploadedImageUrl = ""; 
+
 let cropperInstance = null; // Statically locked global reference
 let activeSelectedTheme = "t1";
 
@@ -288,7 +289,379 @@ function updateLivePreviewCanvas() {
                 <div><h3>Core Framework distribution</h3>${skillsHTML}<h3 style="margin-top:20px;">Showcase Cards System</h3><div class="project-card-grid">${projectsHTML}</div></div>
             </div>`;
     }
+
+            else if (activeSelectedTheme === 't10') {
+
+canvas.innerHTML = `
+
+<div style="
+display:flex;
+height:100%;
+min-height:800px;
+background:white;
+">
+
+<div style="
+width:220px;
+background:#163b70;
+color:white;
+padding:30px;
+display:flex;
+flex-direction:column;
+align-items:center;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid white;
+margin-bottom:25px;
+">
+
+<h2 style="
+writing-mode:vertical-rl;
+font-size:28px;
+letter-spacing:4px;
+margin-top:40px;
+">
+RESUME
+</h2>
+
+</div>
+
+<div style="
+flex:1;
+padding:40px;
+">
+
+<h1 style="
+font-size:42px;
+margin:0;
+color:#163b70;
+">
+${name}
+</h1>
+
+<h3 style="
+margin-top:5px;
+color:#666;
+font-weight:500;
+">
+${role}
+</h3>
+
+<hr>
+
+<h3>ABOUT ME</h3>
+<p>${about}</p>
+
+<h3>SKILLS</h3>
+${skillsHTML}
+
+<h3>EXPERIENCE</h3>
+${expHTML}
+
+<h3>PROJECTS</h3>
+${projectsHTML}
+
+<h3>CONTACT</h3>
+
+<p>📧 ${email}</p>
+<p>📞 ${phone}</p>
+<p>📍 ${location}</p>
+
+</div>
+
+</div>
+`;
+
 }
+else if (activeSelectedTheme === 't11') {
+
+canvas.innerHTML = `
+
+<div style="
+display:flex;
+min-height:850px;
+background:white;
+">
+
+<div style="
+width:280px;
+background:#8b5cf6;
+color:white;
+padding:35px;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:140px;
+height:140px;
+border-radius:50%;
+object-fit:cover;
+border:5px solid white;
+display:block;
+margin:auto;
+">
+
+<h2 style="
+text-align:center;
+margin-top:20px;
+margin-bottom:5px;
+">
+${name}
+</h2>
+
+<p style="
+text-align:center;
+opacity:0.9;
+">
+${role}
+</p>
+
+<hr>
+
+<h3>CONTACT</h3>
+
+<p>📧 ${email}</p>
+<p>📞 ${phone}</p>
+<p>📍 ${location}</p>
+
+<hr>
+
+<h3>SKILLS</h3>
+
+${skillsHTML}
+
+</div>
+
+<div style="
+flex:1;
+padding:40px;
+">
+
+<h2 style="
+color:#8b5cf6;
+">
+ABOUT ME
+</h2>
+
+<p>${about}</p>
+
+<h2 style="
+color:#8b5cf6;
+margin-top:30px;
+">
+EXPERIENCE
+</h2>
+
+${expHTML}
+
+<h2 style="
+color:#8b5cf6;
+margin-top:30px;
+">
+PROJECTS
+</h2>
+
+${projectsHTML}
+
+</div>
+
+</div>
+
+`;
+
+}
+else if (activeSelectedTheme === 't12') {
+
+canvas.innerHTML = `
+
+<div style="background:white;min-height:850px;">
+
+<div style="
+background:#0ea5e9;
+padding:30px;
+color:white;
+display:flex;
+align-items:center;
+gap:20px;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:120px;
+height:120px;
+border-radius:50%;
+object-fit:cover;
+border:4px solid white;
+">
+
+<div>
+<h1 style="margin:0;">${name}</h1>
+<h3 style="margin-top:5px;">${role}</h3>
+</div>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:30px;
+padding:30px;
+">
+
+<div>
+
+<h3>EDUCATION</h3>
+
+${projectsHTML}
+
+<h3 style="margin-top:30px;">
+SKILLS
+</h3>
+
+${skillsHTML}
+
+</div>
+
+<div>
+
+<h3>EXPERIENCE</h3>
+
+${expHTML}
+
+<h3 style="margin-top:30px;">
+ABOUT
+</h3>
+
+<p>${about}</p>
+
+</div>
+
+</div>
+
+<div style="
+padding:20px 30px;
+border-top:1px solid #ddd;
+">
+
+📧 ${email}
+&nbsp;&nbsp;
+📞 ${phone}
+&nbsp;&nbsp;
+📍 ${location}
+
+</div>
+
+</div>
+
+`;
+
+}
+else if (activeSelectedTheme === 'T13') {
+
+canvas.innerHTML = `
+
+<div style="
+background:white;
+padding:40px;
+min-height:900px;
+">
+
+<div style="
+text-align:center;
+margin-bottom:40px;
+">
+
+<img src="${avatarImgSrc}"
+style="
+width:140px;
+height:140px;
+border-radius:50%;
+object-fit:cover;
+border:6px solid #38bdf8;
+">
+
+<h1>${name}</h1>
+<h3 style="color:#38bdf8;">
+${role}
+</h3>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:40px;
+">
+
+<div>
+
+<h2 style="color:#38bdf8;">
+🎓 Education
+</h2>
+
+${projectsHTML}
+
+<h2 style="
+margin-top:30px;
+color:#38bdf8;
+">
+⭐ Skills
+</h2>
+
+${skillsHTML}
+
+</div>
+
+<div>
+
+<h2 style="color:#38bdf8;">
+💼 Experience
+</h2>
+
+${expHTML}
+
+<h2 style="
+margin-top:30px;
+color:#38bdf8;
+">
+👤 About
+</h2>
+
+<p>${about}</p>
+
+</div>
+
+</div>
+
+<div style="
+margin-top:40px;
+padding-top:20px;
+border-top:2px solid #e2e8f0;
+display:flex;
+justify-content:space-between;
+">
+
+<span>📧 ${email}</span>
+
+<span>📞 ${phone}</span>
+
+<span>📍 ${location}</span>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+    }
 
 // 💥 THE 100% BULLETPROOF IMAGE CROPPING FLOW TRIGGER 💥
 imageInput.addEventListener('change', (e) => {
